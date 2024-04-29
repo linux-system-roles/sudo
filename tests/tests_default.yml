@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Ensure that the role runs with default parameters
+  hosts: all
+  gather_facts: false  # test that role works in this case
+  roles:
+    - linux-system-roles.template
+  tasks:
+    - name: Check header for ansible_managed, fingerprint
+      include_tasks: tasks/check_header.yml
+      vars:
+        __file: /etc/foo.conf
+        __fingerprint: system_role:template

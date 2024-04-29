@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Handler for template to restart services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ __template_services }}"
