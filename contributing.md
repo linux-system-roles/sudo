@@ -1,4 +1,4 @@
-# Contributing to the template Linux System Role
+# Contributing to the Sudo Linux System Role
 
 ## Where to start
 
@@ -12,10 +12,10 @@ This has all of the common information that all role developers need:
 * How to create git commits and submit pull requests
 
 **Bugs and needed implementations** are listed on
-[Github Issues](https://github.com/linux-system-roles/template/issues).
+[Github Issues](https://github.com/linux-system-roles/sudo/issues).
 Issues labeled with
-[**help wanted**](https://github.com/linux-system-roles/template/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+[**help wanted**](https://github.com/linux-system-roles/sudo/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 are likely to be suitable for new contributors!
 
-**Code** is managed on [Github](https://github.com/linux-system-roles/template), using
+**Code** is managed on [Github](https://github.com/linux-system-roles/sudo), using
 [Pull Requests](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests).

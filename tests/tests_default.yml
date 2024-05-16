@@ -4,10 +4,10 @@
   hosts: all
   gather_facts: false  # test that role works in this case
   roles:
-    - linux-system-roles.template
+    - linux-system-roles.sudo
   tasks:
     - name: Check header for ansible_managed, fingerprint
       include_tasks: tasks/check_header.yml
       vars:
-        __file: /etc/foo.conf
-        __fingerprint: system_role:template
+        __file: /etc/sudoers
+        __fingerprint: system_role:sudo
