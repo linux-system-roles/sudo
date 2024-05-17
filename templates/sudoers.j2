@@ -15,9 +15,9 @@ Defaults    {{ name }} = {{ paths | join(":") }}
 {%           for items in values | list | slice(6) %}
 {%             if items %}
 {%               if loop.first %}
-Defaults    "{{ name }} = {{ items | list | join(' ') }}"
+Defaults    {{ name }} = "{{ items | list | join(' ') }}"
 {%               else %}
-Defaults    "{{ name }} += {{ items | list | join(' ') }}"
+Defaults    {{ name }} += "{{ items | list | join(' ') }}"
 {%               endif -%}
 {%             endif -%}
 {%           endfor %}
