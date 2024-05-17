@@ -70,7 +70,7 @@ Runas_Alias    {{ ra.name }} = {{ _runas_alias | join(", ") }}
 ## User Aliases
 {%     for ua in item.aliases.user_alias %}
 {%       set _user_alias = [] %}
-{%       for user in ya.users %}
+{%       for user in ua.users %}
 {%         set _ = _user_alias.append(user) %}
 {%       endfor %}
 User_Alias    {{ ua.name }} = {{ _user_alias | join(", ") }}

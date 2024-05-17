@@ -7,9 +7,9 @@
       include_role:
         name: linux-system-roles.sudo
       vars:
-        sudoers_rewrite_default_sudoers_file: True
-        sudoers_remove_unauthorized_included_files: True
-        sudoers_files:
+        sudo_rewrite_default_sudoers_file: True
+        sudo_remove_unauthorized_included_files: True
+        sudo_sudoers_files:
           - path: /etc/sudoers
             defaults:
               - "!visiblepw"
@@ -79,7 +79,7 @@
               user_alias:
                 - name: PINGERS
                   users:
-                    - ahuffman
+                    - username
           - path: /etc/sudoers.d/pingers
             user_specifications:
               - type: user

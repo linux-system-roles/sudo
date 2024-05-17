@@ -1,0 +1,11 @@
+#
+# Ansible managed
+#
+# system_role:sudo
+
+
+
+
+# Default override specifications
+Defaults: PINGERS !requiretty 
+

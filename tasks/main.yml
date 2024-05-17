@@ -36,7 +36,6 @@
     mode: 0440
     validate: "{{ sudo_visudo_path }} -cf %s"
   with_items: "{{ sudo_sudoers_files }}"
-#  become: True
   loop_control:
     label: "{{ item.path }}"
   when: item.path != '/etc/sudoers'

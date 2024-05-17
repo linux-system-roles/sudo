@@ -1,0 +1,162 @@
+---
+- name: Basic test for Sudo
+  hosts: all
+  tasks:
+    - name: Run tests
+      block:
+        - name: Run the role
+          include_role:
+            name: linux-system-roles.sudo
+          vars:
+            sudo_rewrite_default_sudoers_file: True
+            sudo_remove_unauthorized_included_files: True
+            sudo_sudoers_files:
+              - path: /etc/sudoers
+                defaults:
+                  - "!visiblepw"
+                  - always_set_home
+                  - match_group_by_gid
+                  - always_query_group_plugin
+                  - env_reset
+                  - secure_path:
+                      - /sbin
+                      - /bin
+                      - /usr/sbin
+                      - /usr/bin
+                  - env_keep:
+                      - COLORS
+                      - DISPLAY
+                      - HOSTNAME
+                      - HISTSIZE
+                      - KDEDIR
+                      - LS_COLORS
+                      - MAIL
+                      - PS1
+                      - PS2
+                      - QTDIR
+                      - USERNAME
+                      - LANG
+                      - LC_ADDRESS
+                      - LC_CTYPE
+                      - LC_COLLATE
+                      - LC_IDENTIFICATION
+                      - LC_MEASUREMENT
+                      - LC_MESSAGES
+                      - LC_MONETARY
+                      - LC_NAME
+                      - LC_NUMERIC
+                      - LC_PAPER
+                      - LC_TELEPHONE
+                      - LC_TIME
+                      - LC_ALL
+                      - LANGUAGE
+                      - LINGUAS
+                      - _XKB_CHARSET
+                      - XAUTHORITY
+                user_specifications:
+                  - users:
+                      - root
+                    hosts:
+                      - ALL
+                    operators:
+                      - ALL
+                    commands:
+                      - ALL
+                  - users:
+                      - "%wheel"
+                    hosts:
+                      - ALL
+                    operators:
+                      - ALL
+                    commands:
+                      - ALL
+                include_directories:
+                  - /etc/sudoers.d
+                aliases:
+                  cmnd_alias:
+                    - name: PING
+                      commands:
+                        - /bin/ping
+                  user_alias:
+                    - name: PINGERS
+                      users:
+                        - username
+              - path: /etc/sudoers.d/pingers
+                user_specifications:
+                  - type: user
+                    defaults:
+                      - "!requiretty"
+                    users:
+                      - PINGERS
+              - path: /etc/sudoers.d/root
+                defaults:
+                  - syslog=auth
+                user_specifications:
+                  - type: runas
+                    defaults:
+                      - "!set_logname"
+                    operators:
+                      - root
+
+        - name: Create temp test directory
+          tempfile:
+            path: /var/tmp
+            prefix: sudo_
+            state: directory
+          register: __sudo_tmpdir
+
+        - name: Backup sudoers
+          copy:
+            src: /etc/sudoers
+            dest: "{{ __sudo_tmpdir.path }}/sudoers"
+            owner: root
+            group: root
+            mode: 0644
+            remote_src: true
+
+        - name: Backup sudoers.d
+          copy:
+            src: /etc/sudoers.d
+            dest: "{{ __sudo_tmpdir.path }}/sudoers.d"
+            owner: root
+            group: root
+            mode: 0644
+            remote_src: true
+
+        # sha256sum ./files/test_multiple_sudoers_sudoers.ok
+        - name: Check sudoers
+          command: >-
+            echo "5be0fd4d601eaa7ae037045f7333d935520117b6b81f4605f1079cd29f472d0c /etc/sudoers" | sha256sum --check
+
+        # sha256sum ./files/test_multiple_sudoers_pingers.ok
+        - name: Check pingers
+          command: >-
+            echo "381c8fec4c1aa100be800f6640a12010319ec44b8da72fa39d2558ecc381d41d /etc/sudoers.d/pingers" | sha256sum --check
+
+        # sha256sum ./files/test_multiple_sudoers_root.ok
+        - name: Check root
+          command: >-
+            echo "6a4a84012548edf0ee995c126e7329fe1fea62bbc746ec4efc2d664f387b92ba /etc/sudoers.d/root" | sha256sum --check
+
+        - name: Restore sudoers
+          copy:
+            src: "{{ __sudo_tmpdir.path }}/sudoers"
+            dest: /etc/sudoers
+            owner: root
+            group: root
+            mode: 0644
+            remote_src: true
+
+        - name: Restore sudoers.d
+          copy:
+            src: "{{ __sudo_tmpdir.path }}/sudoers.d"
+            dest: /etc/sudoers.d
+            owner: root
+            group: root
+            mode: 0644
+            remote_src: true
+
+        - name: Clean up temp directory
+          file:
+            path: "{{ __sudo_tmpdir.path }}"
+            state: absent
