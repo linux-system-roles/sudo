@@ -1,3 +1,29 @@
+{%- macro render_aliases(alias_desc,alias_str,alias_dict,alias_subdict_name) %}
+{%   if item.aliases[alias_dict] is defined %}
+## {{ alias_desc }}
+{%     for alias_item in item.aliases[alias_dict] %}
+{%       set _alias = [] %}
+{%       for alias_val in alias_item[alias_subdict_name] %}
+{%         set _ = _alias.append(alias_val) %}
+{%       endfor %}
+{{ alias_str }}    {{ alias_item.name }} = {{ _alias | join(", ") }}
+{%     endfor %}
+{%   endif %}
+{% endmacro -%}
+{%- macro render_override_spec(spec,spec_type, spec_dict, sign) %}
+{%   if spec.type == spec_type %}
+{%     set _spec_original = [] %}
+{%     set _spec_default = [] %}
+{%       for spec_original in spec[spec_dict] %}
+{%         set _ = _spec_original.append(spec_original) %}
+{%       endfor %}
+{%       for spec_default in spec.defaults %}
+{%         set _ = _spec_default.append(spec_default) %}
+{%       endfor -%}
+Defaults{{ sign }} {{ _spec_original | join(", ")}} {{ _spec_default |
+  join(", ")}}
+{%    endif %}
+{% endmacro %}
 {{ ansible_managed | default('Ansible managed') | comment }}
 {{ "system_role:sudo" | comment(prefix="", postfix="") }}
 {% if item.defaults is defined %}
@@ -30,57 +56,18 @@ Defaults    {{ default }}
 {%     endif %}
 {%   endfor %}
 {% endif %}
-
 {% if item.aliases is defined %}
+
 # Alias specifications
-{%   if item.aliases.cmnd_alias is defined %}
-## Command Aliases
-{%     for ca in item.aliases.cmnd_alias %}
-{%       set _cmnd_alias = [] %}
-{%       for cmnd in ca.commands %}
-{%         set _ = _cmnd_alias.append(cmnd) %}
-{%       endfor %}
-Cmnd_Alias    {{ ca.name }} = {{ _cmnd_alias | join(", ") }}
-{%     endfor %}
-{%   endif %}
-
-{%   if item.aliases.host_alias is defined %}
-## Host Aliases
-{%     for ha in item.aliases.host_alias %}
-{%       set _host_alias = [] %}
-{%       for host in ha.hosts %}
-{%         set _ = _host_alias.append(host) %}
-{%       endfor %}
-Host_Alias    {{ ha.name }} = {{ _host_alias | join(", ") }}
-{%     endfor %}
-{%   endif %}
-
-{%   if item.aliases.runas_alias is defined %}
-## Runas Aliases
-{%     for ra in item.aliases.runas_alias %}
-{%       set _runas_alias = [] %}
-{%       for user in ra.users %}
-{%         set _ = _runas_alias.append(ra) %}
-{%       endfor %}
-Runas_Alias    {{ ra.name }} = {{ _runas_alias | join(", ") }}
-{%     endfor %}
-{%   endif %}
-
-{%   if item.aliases.user_alias is defined %}
-## User Aliases
-{%     for ua in item.aliases.user_alias %}
-{%       set _user_alias = [] %}
-{%       for user in ua.users %}
-{%         set _ = _user_alias.append(user) %}
-{%       endfor %}
-User_Alias    {{ ua.name }} = {{ _user_alias | join(", ") }}
-{%     endfor %}
-{%   endif %}
+{{ render_aliases("Command Aliases", "Cmnd_Alias", "cmnd_alias", "commands") -}}
+{{ render_aliases("Host Aliases", "Host_Alias", "host_alias", "hosts") -}}
+{{ render_aliases("Runas Aliases", "Runas_Alias", "runas_alias", "users") -}}
+{{ render_aliases("User Aliases", "User_Alias", "user_alias", "users") -}}
 {% endif %}
-
 {% if item.user_specifications is defined %}
 {%   if item.user_specifications | selectattr('type', 'undefined') | flatten |
        length > 0 %}
+
 # User specifications
 {%     for spec in item.user_specifications %}
 {%       if spec.type is undefined %}
@@ -160,66 +147,28 @@ User_Alias    {{ ua.name }} = {{ _user_alias | join(", ") }}
 {%       endif %}
 {%     endfor %}
 {%   endif %}
-
 {% endif %}
 {% if item.user_specifications | selectattr('defaults', 'defined') |
      map(attribute='defaults') | flatten | length > 0 %}
+
 # Default override specifications
 {%   for spec in item.user_specifications %}
 {%     if spec.type is defined %}
-{%       if spec.type == 'user'%}
-{%         set ospec_users = [] %}
-{%         set ospec_users_default = [] %}
-{%         for user in spec.users %}
-{%           set _ = ospec_users.append(user) %}
-{%         endfor %}
-{%         for default in spec.defaults %}
-{%           set _ = ospec_users_default.append(default) %}
-{%         endfor %}
-Defaults: {{ ospec_users | join(", ")}} {{ ospec_users_default | join(", ")}} 
-{%       elif spec.type == 'runas' %}
-{%         set ospec_ops = [] %}
-{%         set ospec_ops_default = [] %}
-{%         for op in spec.operators %}
-{%           set _ = ospec_ops.append(op) %}
-{%         endfor %}
-{%         for default in spec.defaults %}
-{%           set _ = ospec_ops_default.append(default) %}
-{%         endfor %}
-Defaults> {{ ospec_ops | join(", ")}} {{ ospec_ops_default | join(", ")}} 
-{%       elif spec.type == 'host' %}
-{%         set ospec_hosts = [] %}
-{%         set ospec_hosts_default = [] %}
-{%         for host in spec.hosts %}
-{%           set _ = ospec_hosts.append(host) %}
-{%         endfor %}
-{%         for default in spec.defaults %}
-{%           set _ = ospec_hosts_default.append(default) %}
-{%         endfor %}
-Defaults@ {{ ospec_hosts | join(", ")}} {{ ospec_hosts_default | join(", ")}} 
-{%       elif spec.type == 'command' %}
-{%         set ospec_cmnds = [] %}
-{%         set ospec_cmnds_default = [] %}
-{%         for cmnd in spec.commands %}
-{%           set _ = ospec_cmnds.append(cmnd) %}
-{%         endfor %}
-{%         for default in spec.defaults %}
-{%           set _ = ospec_cmnds_default.append(default) %}
-{%         endfor %}
-Defaults! {{ ospec_cmnds | join(", ")}} {{ ospec_cmnds_default | join(", ")}} 
-{%       endif %}
+{{ render_override_spec(spec,"user","users",":") -}}
+{{ render_override_spec(spec,"runas","operators",">") -}}
+{{ render_override_spec(spec,"host","hosts","@") -}}
+{{ render_override_spec(spec,"command","commands","!") -}}
 {%     endif %}
 {%   endfor %}
-
 {% endif %}
 {% if item.include_files is defined or item.include_directories is defined %}
+
 # Includes
 {%   if item.include_files is defined and item.include_files | length > 0 %}
 ## Include files
 {%     for file in item.include_files %}
 #include {{ file }}
 {%     endfor %}
-
 {%   endif %}
 {%   if item.include_directories is defined and item.include_directories | 
        length > 0 %}
