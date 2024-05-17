@@ -309,3 +309,5 @@ MIT
 ## Author Information
 
 Radovan Sroka @rsroka
+
+Based on https://github.com/ahuffman/ansible-sudoers

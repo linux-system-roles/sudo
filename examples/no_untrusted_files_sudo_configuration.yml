@@ -9,8 +9,6 @@
       vars:
         sudoers_rewrite_default_sudoers_file: True
         sudoers_remove_unauthorized_included_files: True
-        sudoers_backup: True
-        sudoers_backup_path: sudoers-backups
         sudoers_files:
           - path: /etc/sudoers
             defaults:
