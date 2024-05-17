@@ -1,19 +1,24 @@
 {{ ansible_managed | default('Ansible managed') | comment }}
 {{ "system_role:sudo" | comment(prefix="", postfix="") }}
-
 {% if item.defaults is defined %}
-
 # Default specifications
 {%   for default in item.defaults %}
 {%     if default is mapping %}
 {%       for name, values in default.items() %}
 {%         if name == 'secure_path' %}
-Defaults    {{ name }} = {% for item in values %}{% if not loop.last %}{{ item }}:{% else %}{{ item }}{% endif %}{% endfor %}
-
+{%           set paths = [] %}
+{%           for my_value in values %}
+{%             set _ = paths.append(my_value) %}
+{%           endfor %}
+Defaults    {{ name }} = {{ paths | join(":") }}
 {%         else %}
 {%           for items in values | list | slice(6) %}
 {%             if items %}
-Defaults    {{ name }} {% if not loop.first %}+{% endif %}= "{{ items | list | join(' ') }}"
+{%               if loop.first %}
+Defaults    {{ name }} = {{ items | list | join(' ') | quote }}
+{%               else %}
+Defaults    {{ name }} += {{ items | list | join(' ') | quote }}
+{%               endif -%}
 {%             endif -%}
 {%           endfor %}
 {%         endif %}
@@ -24,71 +29,184 @@ Defaults{{ default }}
 Defaults    {{ default }}
 {%     endif %}
 {%   endfor %}
-
 {% endif %}
+
 {% if item.aliases is defined %}
 # Alias specifications
 {%   if item.aliases.cmnd_alias is defined %}
 ## Command Aliases
 {%     for ca in item.aliases.cmnd_alias %}
-Cmnd_Alias    {{ ca.name }} = {% for cmnd in ca.commands %}{% if not loop.last %}{{ cmnd }}, {% else %}{{ cmnd }}{% endif %}{% endfor %}
-
+{%       set _cmnd_alias = [] %}
+{%       for cmnd in ca.commands %}
+{%         set _ = _cmnd_alias.append(cmnd) %}
+{%       endfor %}
+Cmnd_Alias    {{ ca.name }} = {{ _cmnd_alias | join(", ") }}
 {%     endfor %}
-
 {%   endif %}
+
 {%   if item.aliases.host_alias is defined %}
 ## Host Aliases
 {%     for ha in item.aliases.host_alias %}
-Host_Alias    {{ ha.name }} = {% for host in ha.hosts %}{% if not loop.last %}{{ host }}, {% else %}{{ host }}{% endif %}{% endfor %}
-
+{%       set _host_alias = [] %}
+{%       for host in ha.hosts %}
+{%         set _ = _host_alias.append(host) %}
+{%       endfor %}
+Host_Alias    {{ ha.name }} = {{ _host_alias | join(", ") }}
 {%     endfor %}
-
 {%   endif %}
+
 {%   if item.aliases.runas_alias is defined %}
 ## Runas Aliases
 {%     for ra in item.aliases.runas_alias %}
-Runas_Alias    {{ ra.name }} = {% for user in ra.users %}{% if not loop.last %}{{ user }}, {% else %}{{ user }}{% endif %}{% endfor %}
-
+{%       set _runas_alias = [] %}
+{%       for user in ra.users %}
+{%         set _ = _runas_alias.append(ra) %}
+{%       endfor %}
+Runas_Alias    {{ ra.name }} = {{ _runas_alias | join(", ") }}
 {%     endfor %}
-
 {%   endif %}
+
 {%   if item.aliases.user_alias is defined %}
 ## User Aliases
 {%     for ua in item.aliases.user_alias %}
-User_Alias    {{ ua.name }} = {% for user in ua.users %}{% if not loop.last %}{{ user }}, {% else %}{{ user }}{% endif %}{% endfor %}
-
+{%       set _user_alias = [] %}
+{%       for user in ya.users %}
+{%         set _ = _user_alias.append(user) %}
+{%       endfor %}
+User_Alias    {{ ua.name }} = {{ _user_alias | join(", ") }}
 {%     endfor %}
-
 {%   endif %}
 {% endif %}
+
 {% if item.user_specifications is defined %}
-{%   if item.user_specifications | selectattr('type', 'undefined') | flatten | length > 0 %}
+{%   if item.user_specifications | selectattr('type', 'undefined') | flatten |
+       length > 0 %}
 # User specifications
 {%     for spec in item.user_specifications %}
 {%       if spec.type is undefined %}
-{% for user in spec.users %}{% if not loop.last %}{{ user }}, {% else %}{{ user }}{% endif %}{% endfor %} {% for host in spec.hosts %}{% if not loop.last %}{{ host }}, {% else %}{{ host }}{% endif %}{% endfor %}={% if spec.operators is defined %}({% for op in spec.operators %}{% if not loop.last%}{{ op }}, {% else %}{{ op }}{% endif %}{% endfor %}){% endif %} {% if spec.selinux_type is defined %}TYPE={% for type in spec.selinux_type %}{% if not loop.last %}{{ type }}, {% else %}{{ type }} {% endif %}{% endfor %}{% endif %}{% if spec.selinux_role is defined %}ROLE={% for role in spec.selinux_role %}{% if not loop.last %}{{ role }}, {% else %}{{ role }} {% endif %}{% endfor %}{% endif %}{% if spec.solaris_privs is defined %}PRIVS={% for priv in spec.solaris_privs %}{% if not loop.last %}{{ priv }}, {% else %}{{ priv }} {% endif %}{% endfor %}{% endif %}{% if spec.solaris_limitprivs is defined %}LIMITPRIVS={% for lpriv in spec.solaris_limitprivs %}{% if not loop.last %}{{ lpriv }}, {% else %}{{ lpriv }} {% endif %}{% endfor %}{% endif %}{% if spec.tags is defined %}{% for tag in spec.tags %}{{ tag }}:{% endfor %} {% endif %}{% for cmnd in spec.commands %}{% if not loop.last %}{{ cmnd }}, {% else %}{{ cmnd }}{% endif %}{% endfor %}
-
+{%         set user_spec = [] %}
+{%         set spec_users = [] %}
+{%         set spec_hosts = [] %}
+{%         set spec_ops = [] %}
+{%         set spec_types = [] %}
+{%         set spec_roles = [] %}
+{%         set spec_privs = [] %}
+{%         set spec_lprivs = [] %}
+{%         set spec_tags = [] %}
+{%         set spec_cmnds = [] %}
+{%         for user in spec.users %}
+{%           set _ = spec_users.append(user) %}
+{%         endfor %}
+{%         set _ = user_spec.append(spec_users | join(", ")) %}
+{%         set _ = user_spec.append(" ") %}
+{%         for host in spec.hosts %}
+{%           set _ = spec_hosts.append(host) %}
+{%         endfor %}
+{%         set _ = user_spec.append(spec_hosts | join(", ")) %}
+{%         set _ = user_spec.append("=") %}
+{%         if spec.operators is defined %}
+{%           set _ = user_spec.append("(") %}
+{%           for op in spec.operators %}
+{%             set _ = spec_ops.append(op) %}
+{%           endfor %}
+{%         set _ = user_spec.append(spec_ops | join(", ")) %}
+{%         set _ = user_spec.append(")") %}
+{%         endif %}
+{%         set _ = user_spec.append(" ") %}
+{%         if spec.selinux_type is defined %}
+{%           set _ = user_spec.append("TYPE=") %}
+{%           for type in spec.selinux_type %}
+{%             set _ = spec_types.append(type) %}
+{%           endfor %}
+{%           set _ = user_spec.append(spec_types | join(", ")) %}
+{%           set _ = user_spec.append(" ") %}
+{%         endif %}
+{%         if spec.selinux_role is defined %}
+{%           set _ = user_spec.append("ROLE=") %}
+{%           for role in spec.selinux_role %}
+{%             set _ = spec_roles.append(role) %}
+{%           endfor %}
+{%           set _ = user_spec.append(spec_roles | join(", ")) %}
+{%           set _ = user_spec.append(" ") %}
+{%         endif %}
+{%         if spec.solaris_privs is defined %}
+{%           set _ = user_spec.append("PRIVS=") %}
+{%           for priv in spec.solaris_privs %}
+{%             set _ = spec_privs.append(priv) %}
+{%           endfor %}
+{%           set _ = user_spec.append(spec_privs | join(", ")) %}
+{%           set _ = user_spec.append(" ") %}
+{%         endif %}
+{%         if spec.solaris_limitprivs is defined %}
+{%           set _ = user_spec.append("LIMITPRIVS=") %}
+{%           for lpriv in spec.solaris_limitprivs %}
+{%             set _ = spec_lprivs.append(lpriv) %}
+{%           endfor %}
+{%           set _ = user_spec.append(spec_lprivs | join(", ")) %}
+{%           set _ = user_spec.append(" ") %}
+{%         endif %}
+{%         if spec.tags is defined %}
+{%           for tag in spec.tags %}
+{%             set _ = spec_tags.append(tag) %}
+{%           endfor %}
+{%           set _ = user_spec.append(spec_tags | join(":")) %}
+{%           set _ = user_spec.append(": ") %}
+{%         endif %}
+{%         for cmnd in spec.commands %}
+{%           set _ = spec_cmnds.append(cmnd) %}
+{%         endfor %}
+{%         set _ = user_spec.append(spec_cmnds | join(", ")) %}
+{{ user_spec | join('') }}
 {%       endif %}
 {%     endfor %}
 {%   endif %}
 
 {% endif %}
-{% if item.user_specifications | selectattr('defaults', 'defined') | map(attribute='defaults') | flatten | length > 0 %}
+{% if item.user_specifications | selectattr('defaults', 'defined') |
+     map(attribute='defaults') | flatten | length > 0 %}
 # Default override specifications
 {%   for spec in item.user_specifications %}
 {%     if spec.type is defined %}
 {%       if spec.type == 'user'%}
-Defaults:{% for user in spec.users %}{% if not loop.last %}{{ user }}, {% else %}{{ user }} {% endif %}{% endfor %}{% for default in spec.defaults %}{% if not loop.last %}{{ default }}, {% else %}{{ default }}{% endif %}{% endfor %}
-
+{%         set ospec_users = [] %}
+{%         set ospec_users_default = [] %}
+{%         for user in spec.users %}
+{%           set _ = ospec_users.append(user) %}
+{%         endfor %}
+{%         for default in spec.defaults %}
+{%           set _ = ospec_users_default.append(default) %}
+{%         endfor %}
+Defaults: {{ ospec_users | join(", ")}} {{ ospec_users_default | join(", ")}} 
 {%       elif spec.type == 'runas' %}
-Defaults>{% for op in spec.operators %}{% if not loop.last %}{{ op }}, {% else %}{{ op }} {% endif %}{% endfor %}{% for default in spec.defaults %}{% if not loop.last %}{{ default }}, {% else %}{{ default }}{% endif %}{% endfor %}
-
+{%         set ospec_ops = [] %}
+{%         set ospec_ops_default = [] %}
+{%         for op in spec.operators %}
+{%           set _ = ospec_ops.append(op) %}
+{%         endfor %}
+{%         for default in spec.defaults %}
+{%           set _ = ospec_ops_default.append(default) %}
+{%         endfor %}
+Defaults> {{ ospec_ops | join(", ")}} {{ ospec_ops_default | join(", ")}} 
 {%       elif spec.type == 'host' %}
-Defaults@{% for host in spec.hosts %}{% if not loop.last %}{{ host }}, {% else %}{{ host }} {% endif %}{% endfor %}{% for default in spec.defaults %}{% if not loop.last %}{{ default }}, {% else %}{{ default }}{% endif %}{% endfor %}
-
+{%         set ospec_hosts = [] %}
+{%         set ospec_hosts_default = [] %}
+{%         for host in spec.hosts %}
+{%           set _ = ospec_hosts.append(host) %}
+{%         endfor %}
+{%         for default in spec.defaults %}
+{%           set _ = ospec_hosts_default.append(default) %}
+{%         endfor %}
+Defaults@ {{ ospec_hosts | join(", ")}} {{ ospec_hosts_default | join(", ")}} 
 {%       elif spec.type == 'command' %}
-Defaults!{% for cmnd in spec.commands %}{% if not loop.last %}{{ cmnd }}, {% else %}{{ cmnd }} {% endif %}{% endfor %}{% for default in spec.defaults %}{% if not loop.last %}{{ default }}, {% else %}{{ default }}{% endif %}{% endfor %}
-
+{%         set ospec_cmnds = [] %}
+{%         set ospec_cmnds_default = [] %}
+{%         for cmnd in spec.commands %}
+{%           set _ = ospec_cmnds.append(cmnd) %}
+{%         endfor %}
+{%         for default in spec.defaults %}
+{%           set _ = ospec_cmnds_default.append(default) %}
+{%         endfor %}
+Defaults! {{ ospec_cmnds | join(", ")}} {{ ospec_cmnds_default | join(", ")}} 
 {%       endif %}
 {%     endif %}
 {%   endfor %}
@@ -103,7 +221,8 @@ Defaults!{% for cmnd in spec.commands %}{% if not loop.last %}{{ cmnd }}, {% els
 {%     endfor %}
 
 {%   endif %}
-{%   if item.include_directories is defined and item.include_directories | length > 0 %}
+{%   if item.include_directories is defined and item.include_directories | 
+       length > 0 %}
 ## Include directories
 {%     for dir in item.include_directories %}
 #includedir {{ dir }}
