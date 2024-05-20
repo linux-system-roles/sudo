@@ -3,19 +3,18 @@
   package:
     name: sudo
     state: present
-  register: sudo_installed
 
 - name: Set include directories variable
   set_fact:
     sudo_include_dirs: "{{ sudo_sudoers_files
-    | selectattr('include_directories', 'defined')
-    | map(attribute='include_directories') | flatten }}"
+      | selectattr('include_directories', 'defined')
+      | map(attribute='include_directories') | flatten }}"
 
 - name: Set sudoer file paths variable
   set_fact:
     sudo_file_paths: "{{ sudo_sudoers_files
-    | selectattr('path', 'defined')
-    | map(attribute='path') | flatten }}"
+      | selectattr('path', 'defined')
+      | map(attribute='path') | flatten }}"
 
 - name: Ensure include directories are created
   file:
@@ -43,7 +42,7 @@
 - name: Ensure /etc/sudoers is configured
   template:
     src: sudoers.j2
-    dest: /etc/sudoers
+    dest: "{{ item.path  }}"
     owner: root
     group: root
     mode: 0440
@@ -63,8 +62,8 @@
     - name: Search for sudoers files in included directories
       find:
         paths: "{{ sudo_include_dirs }}"
-        recurse: True
-        hidden: True
+        recurse: true
+        hidden: true
         file_type: any
       register: sudo_existing_included_files
 

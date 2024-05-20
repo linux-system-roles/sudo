@@ -7,8 +7,8 @@
       include_role:
         name: linux-system-roles.sudo
       vars:
-        sudo_rewrite_default_sudoers_file: True
-        sudo_remove_unauthorized_included_files: True
+        sudo_rewrite_default_sudoers_file: true
+        sudo_remove_unauthorized_included_files: true
         sudo_sudoers_files:
           - path: /etc/sudoers
             defaults:

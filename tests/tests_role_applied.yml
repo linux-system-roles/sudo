@@ -8,8 +8,8 @@
           include_role:
             name: linux-system-roles.sudo
           vars:
-            sudo_rewrite_default_sudoers_file: True
-            sudo_remove_unauthorized_included_files: True
+            sudo_rewrite_default_sudoers_file: true
+            sudo_remove_unauthorized_included_files: true
 
         - name: Create temp test directory
           tempfile:
@@ -36,10 +36,17 @@
             mode: 0644
             remote_src: true
 
+        - name: Get stat of tests/files/test_role_applied.ok
+          delegate_to: localhost
+          stat:
+            path: files/test_role_applied.ok
+            checksum_algorithm: sha256
+          register: sudoers_ok
+
         # sha256sum ./files/test_role_applied.ok
         - name: Check sudoers
           command: >-
-            echo "5b88319c0fb98c646ee94b6ccd2314a1b46df1c3f42e6948a42fb920217d9726 /etc/sudoers"  | sha256sum --check
+            echo "{{ sudoers.ok.stat.checksum }} /etc/sudoers" | sha256sum --check
 
         - name: Restore sudoers
           copy:

@@ -1,6 +1,6 @@
 ---
-sudo_rewrite_default_sudoers_file: True
-sudo_remove_unauthorized_included_files: False
+sudo_rewrite_default_sudoers_file: true
+sudo_remove_unauthorized_included_files: false
 
 sudo_visudo_path: /usr/sbin/visudo
 
