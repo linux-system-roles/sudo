@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Get stat of {{ __sudo_ok_path }}
+  delegate_to: localhost
+  stat:
+    path: "{{ __sudo_ok_path }}"
+    checksum_algorithm: sha256
+  register: __ok_path_stat
+
+- name: Get stat of {{ __sudo_test_path }}
+  stat:
+    path: "{{ __sudo_test_path }}"
+    checksum_algorithm: sha256
+  register: __test_path_stat
+
+- name: Assert that files are identical
+  assert:
+    that: __ok_path_stat.stat.checksum == __test_path_stat.stat.checksum

@@ -181,40 +181,22 @@
           register: sudoers_ok
 
         - name: Check sudoers
-          shell: >-
-            echo "{{ sudoers_ok.stat.checksum }} /etc/sudoers" |
-            sha256sum --check
-          changed_when: false
-
-        - name: Get stat of {{ ok_path }}
-          delegate_to: localhost
+          include_tasks: tasks/assert_files_identical.yml
           vars:
-            ok_path: files/tests_large_configuration_pingers.ok
-          stat:
-            path: "{{ ok_path }}"
-            checksum_algorithm: sha256
-          register: pingers_ok
+            __sudo_ok_path: files/tests_large_configuration_sudoers.ok
+            __sudo_test_path: /etc/sudoers
 
         - name: Check pingers
-          shell: >-
-            echo "{{ pingers_ok.stat.checksum }} /etc/sudoers.d/pingers" |
-            sha256sum --check
-          changed_when: false
-
-        - name: Get stat of {{ ok_path }}
-          delegate_to: localhost
+          include_tasks: tasks/assert_files_identical.yml
           vars:
-            ok_path: files/tests_large_configuration_root.ok
-          stat:
-            path: "{{ ok_path }}"
-            checksum_algorithm: sha256
-          register: root_ok
+            __sudo_ok_path: files/tests_large_configuration_pingers.ok
+            __sudo_test_path: /etc/sudoers.d/pingers
 
         - name: Check root
-          shell: >-
-            echo "{{ root_ok.stat.checksum }} /etc/sudoers.d/root" |
-            sha256sum --check
-          changed_when: false
+          include_tasks: tasks/assert_files_identical.yml
+          vars:
+            __sudo_ok_path: files/tests_large_configuration_root.ok
+            __sudo_test_path: /etc/sudoers.d/root
 
         - name: Restore sudoers
           copy:
