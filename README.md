@@ -1,10 +1,11 @@
 # Sudo
 
-Sudo System Role
+This role configures sudo.
 
 ## Requirements
 
-This role is only supported on RHEL8+ and Fedora distributions. Consider reading sudo documentation before setting it up.
+This role is only supported on RHEL8+ and Fedora distributions.
+Consider reading sudo documentation before setting it up.
 
 ### Collection requirements
 
@@ -12,242 +13,201 @@ None.
 
 ## Role Variables
 
-The defaults defined for this role are based on a default RHEL8.4 `/etc/sudoers` configuration. Please check the defaults in [`defaults/main.yml`](defaults/main.yml) prior to running for OS compatibility.
+The defaults defined for this role are based on a default RHEL8.4 `/etc/sudoers` configuration.
+Check the defaults in [`defaults/main.yml`](defaults/main.yml) prior to running for OS compatibility.
 
 ### sudo_rewrite_default_sudoers_file
 
-Use role default or user defined `sudoers_files` definition, replacing your distribution supplied `/etc/sudoers` file. Useful when attempting to deploy new configuration files to the `include_directories` and you do not wish to modify the `/etc/sudoers` file.  
+Use role default or user defined `sudo_sudoers_files` definition, replacing your distribution supplied `/etc/sudoers` file.
+Useful when attempting to deploy new configuration files to the `include_directories` and you do not wish to modify the `/etc/sudoers` file.
 
-Default: `true`  
-Type: `bool`  
+Default: `true`
+
+Type: `bool`
 
 ### sudo_remove_unauthorized_included_files
 
-***Dangerous!*** Each existing sudoers file found in the `include_directories` dictionary which have not been defined in `sudoers_files` will be removed. This allows for enforcing a desired state.  
+***Dangerous!*** Setting this to `true` removes each existing sudoers file in the `include_directories` dictionary that are not defined in the`sudo_sudoers_files` variable.
+This allows for enforcing a desired state.
 
 Default: `false`  
 Type: `bool`  
 
 ### sudo_visudo_path
 
-Fully-qualified path to the `visudo` binary required for validation of sudoers configuration changes. Added for Operating System compatibility.  
+Fully-qualified path to the `visudo` binary required for validation of sudoers configuration changes
+Added for Operating System compatibility.
 
-Default: `/usr/bin/visudo`  
-Type: `string`  
+Default: `/usr/bin/visudo`
+
+Type: `string`
 
 ### sudo_sudoers_files
 
-Definition of all your sudoers configurations | see [defaults/main.yml](defaults/main.yml)  
+A list that defines sudoers configurations.
 
-Default:  
+For the default configuration, see [defaults/main.yml](defaults/main.yml).
 
-``` yaml
-  - path: /etc/sudoers
-    defaults:
-      - "!visiblepw"
-      - always_set_home
-      - match_group_by_gid
-      - always_query_group_plugin
-      - env_reset
-      - secure_path:
-          - /sbin
-          - /bin
-          - /usr/sbin
-          - /usr/bin
-      - env_keep:
-          - COLORS
-          - DISPLAY
-          - HOSTNAME
-          - HISTSIZE
-          - KDEDIR
-          - LS_COLORS
-          - MAIL
-          - PS1
-          - PS2
-          - QTDIR
-          - USERNAME
-          - LANG
-          - LC_ADDRESS
-          - LC_CTYPE
-          - LC_COLLATE
-          - LC_IDENTIFICATION
-          - LC_MEASUREMENT
-          - LC_MESSAGES
-          - LC_MONETARY
-          - LC_NAME
-          - LC_NUMERIC
-          - LC_PAPER
-          - LC_TELEPHONE
-          - LC_TIME
-          - LC_ALL
-          - LANGUAGE
-          - LINGUAS
-          - _XKB_CHARSET
-          - XAUTHORITY
-    user_specifications:
-      - users:
-          - root
-        hosts:
-          - ALL
-        operators:
-          - ALL
-        commands:
-          - ALL
-      - users:
-          - "%wheel"
-        hosts:
-          - ALL
-        operators:
-          - ALL
-        commands:
-          - ALL
-    include_directories:
-      - /etc/sudoers.d
-```
-
-Type: `list`  
+Type: `list`
 
 #### path
 
-Where to deploy the configuration file to on the filesystem.  
+Where to deploy the configuration file to on the filesystem.
 
-Type: `string`  
+Type: `string`
 
 #### aliases
 
-Optional definition of `cmnd_alias`, `host_alias`, `runas_alias`, or `user_alias` items.  
+A dictionary containing optional definition of `User_Alias`, `Runas_Alias`, `Host_Alias`, and `Cmnd_Alias` aliases.
 
-Type: `dictionary`  
+This dictionary can be used to assign either user specifications or default overrides.
+
+Available keys:
+
+1. `user_alias`, requires setting a name with the `name` string and a list of users with the `users` list.
+2. `runas_alias`, requires setting a name with the `name` string and a list of users with the `users` list.
+3. `host_alias`, requires setting a name with the `name` string and a list of hosts with the `hosts` list.
+4. `cmnd_alias`, requires setting a name with the `name` string and a list of commands with the `commands` list.
+
+Example definition:
+
+```yaml
+sudo_sudoers_files:
+  aliases:
+    user_alias:
+      - name: PINGERS
+        users:
+          - username
+    runas_alias:
+      - name: RUNAS
+        users:
+          - username
+    cmnd_alias:
+      - name: PING
+        commands:
+          - /usr/bin/ping
+    cmnd_alias:
+      - name: PING
+        commands:
+          - /usr/bin/ping
+```
 
 #### defaults
 
-This allows you to define the defaults of your sudoers configuration. Default overrides can be perfomed via the [`user_specifications`](#default-override-user_specifications) key.  
+You can use this to define the defaults of sudoers configuration.
 
-Type: `list`  
+You can perform default overrides via the [`user_specifications`](#default-override-user_specifications) key.
+
+Type: `list`
 
 #### include_files
 
-Optional specific files that you would like your configuration to include. This is a list of fully-qualified paths to include via the `#include` option of a sudoers configuration.  
+Optional, a list of files that your configuration must include.
 
-Type: `list`  
+This is a list of fully-qualified paths to include via the `#include` option of a sudoers configuration.
+
+Type: `list`
 
 #### include_directories
 
-Optional specific directories that you would like your configurations to include. This is a list of fully-qualified paths to directories to include via the `#includedir` option of a sudoers configuration.  
+Optional, a list of directories that your configurations must include.
+
+This is a list of fully-qualified paths to directories to include via the `#includedir` option of a sudoers configuration.
 
 Type: `list`  
 
 #### user_specifications
 
-List of user specifications and default overrides to apply to a sudoers file configuration.  
+You can use this `list` variable to apply [Standard user_specifications](#standard-user_specifications) and [Default Override user_specifications](#default-override-user_specifications) to a sudoers file configuration.
 
-Type: `list`  
+##### Standard user_specifications
 
-### sudo_sudoers_files aliases
+Supported entries:
 
-This dictionary can be used to assign either user specifications or default overrides.
+`users` List of users to apply the specification to.
+You can use a `user_alias` name as well as user names.
 
-Type: `dictionary`  
+`hosts` List of hosts to apply the specification to.
+You can use a defined `host_alias` name as well as host names.
 
-#### cmnd_alias
+`operators` List of operators to apply the specification to.
+You can use a defined `runas_alias` name as well as user names.
 
-`name` Name of the command alias and commands.  
-Type: `string`  
+`selinux_role` Optional selinux role to apply to the specification.
 
-`commands` List of commands to apply to the alias.  
-Type: `list`  
+`selinux_type` Optional selinux type to apply to the specification.
 
-#### host_alias
+`solaris_privs` Optional Solaris privset to apply to the specification.
 
-`name` Name of the host alias.  
-Type: `string`  
-  
-`hosts` List of hosts to apply to the alias.  
-Type: `list`  
+`solaris_limitprivs` Optional Solaris privset to apply to the specification.
 
-#### runas_alias
+`tags` Optional list of tags to apply to the specification.
 
-`name` Name of the runas alias.  
-Type: `string`  
-
-`users` List of users to apply to the alias.  
-Type: `list`  
-
-#### user_alias
-
-`name` Name of the user_alias.  
-Type: `string`  
-
-`users` List of users to apply to the alias.  
-Type: `list`  
-
-### Other user_specifications
-
-#### Standard user_specifications
-
-`users` List of users to apply the specification to. You can use a `user_alias` name as well as user names.  
-
-Type: `list`  
-
-`hosts` List of hosts to apply the specification to. You can use a defined `host_alias` name as well as host names.  
-
-Type: `list`  
-
-`operators` List of operators to apply the specification to. You can use a defined `runas_alias` name as well as user names.  
-
-Type: `list`  
-
-`selinux_role` Optional selinux role to apply to the specification.  
-
-Type: `list`  
-
-`selinux_type` Optional selinux type to apply to the specification.  
-
-Type: `list`  
-
-`solaris_privs` Optional Solaris privset to apply to the specification.  
-
-Type: `list`  
-
-`solaris_limitprivs` Optional Solaris privset to apply to the specification.  
-
-Type: `list`  
-
-`tags` Optional list of tags to apply to the specification.  
-
-Type: `list`  
-
-`commands` List of commands to apply the specification to. You can use a defined `cmnd_alias` name as well as commands.  
-
-Type: `list`  
+`commands` List of commands to apply the specification to.
+You can use a defined `cmnd_alias` name as well as commands.
 
 #### Default Override user_specifications
 
-`defaults` List of defaults to override from the main configuration.  
+Supported entries:
 
-Type: `list`  
+`defaults` List of defaults to override from the main configuration.
 
-`type` Type of default to override, this affects the operator in the configuration ( host -> `@`, user -> `:`, command -> `!`, and runas -> `>`). The type field can be one of the following values: `command`, `host`, `runas`, or `user`.  
+`type` Type of default to override, this affects the operator in the configuration ( host -> `@`, user -> `:`, command -> `!`, and runas -> `>`).
+The type field can be one of the following values: `command`, `host`, `runas`, or `user`.
 
-Type: `string`  
+`commands` Use when `type: command`.
+List of `cmnd_alias` names as well as commands to override specific default values.
 
-`commands` Use when `type: command`. List of `cmnd_alias` names as well as commands to override specific default values.  
+`hosts` Use when `type: host`.
+List of `host_alias` names as well as individual host names to override specific default values.
 
-Type: `list`  
+`operators` Use when `type: runas`.
+List of `runas_alias` names as well as individual user names to override specific default values.
 
-`hosts` Use when `type: host`. List of `host_alias` names as well as individual host names to override specific default values.  
+`users` Use when `type: user`.
+List of `user_alias` names as well as individual user names to override specific default values.
 
-Type: `list`  
+Example Definition:
 
-`operators` Use when `type: runas`. List of `runas_alias` names as well as individual user names to override specific default values.  
+```yaml
+        sudo_sudoers_files:
+          - path: /etc/sudoers.d/pingers
+            user_specifications:
+              - users:
+                  - root
+                hosts:
+                  - ALL
+                operators:
+                  - ALL
+                commands:
+                  - ALL
+              - type: user
+                defaults:
+                  - "!requiretty"
+                users:
+                  - PINGERS
+              - type: runas
+                defaults:
+                  - "!set_logname"
+                operators:
+                  - root
+              - type: host
+                defaults:
+                  - "!requiretty"
+                  - "!requiretty"
+                hosts:
+                  - host1
+                  - host2
+              - type: command
+                defaults:
+                  - "!requiretty"
+                commands:
+                  - /usr/bin/ls
+```
 
-Type: `list`  
+## Example Playbooks
 
-`users` Use when `type: user`. List of `user_alias` names as well as individual user names to override specific default values.  
-
-Type: `list`  
-
-## Example Playbook
+### Applying a RHEL Default /etc/sudoers configuration
 
 ```yaml
 ---
@@ -257,9 +217,11 @@ Type: `list`
     - role: linux-system-roles.sudo
 ```
 
+### Applying custom /etc/sudoers configuration
+
 ```yaml
 ---
-- name: Apply custom /etc/sudoers configuration
+- name: Apply a custom /etc/sudoers configuration
   hosts: all
   vars:
     sudoers_files:
@@ -275,9 +237,11 @@ Type: `list`
   - role: linux-system-roles.sudo
 ```
 
+### Applying defaults
+
 ```yaml
 ---
-- name: Apply a RHEL Default /etc/sudoers configuration
+- name: Apply defaults
   hosts: all
   vars:
   sudoers_files:
@@ -345,6 +309,8 @@ Type: `list`
   roles:
     - role: linux-system-roles.sudo
 ```
+
+### Applying a multi-file sudoers configuration
 
 ```yaml
 ---
@@ -423,7 +389,7 @@ Type: `list`
               cmnd_alias:
                 - name: PING
                   commands:
-                    - /bin/ping
+                    - /usr/bin/ping
               user_alias:
                 - name: PINGERS
                 users:
