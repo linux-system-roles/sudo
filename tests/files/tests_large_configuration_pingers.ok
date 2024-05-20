@@ -3,7 +3,6 @@
 #
 # system_role:sudo
 
-
 # Default override specifications
 Defaults: PINGERS !requiretty
 Defaults> root !set_logname

@@ -1,6 +1,7 @@
 #
 # Ansible managed
 #
+# system_role:sudo
 
 # Default specifications
 Defaults    !visiblepw

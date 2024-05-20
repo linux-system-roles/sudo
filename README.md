@@ -118,56 +118,33 @@ Type: `list`
 
 #### user_specifications
 
-You can use this `list` variable to apply [Standard user_specifications](#standard-user_specifications) and [Default Override user_specifications](#default-override-user_specifications) to a sudoers file configuration.
-
-##### Standard user_specifications
+You can use this `list` variable to apply user specifications to a sudoers file configuration.
 
 Supported entries:
 
-`users` List of users to apply the specification to.
+1. `users` - List of users to apply the specification to.
 You can use a `user_alias` name as well as user names.
 
-`hosts` List of hosts to apply the specification to.
+2. `hosts` - List of hosts to apply the specification to.
 You can use a defined `host_alias` name as well as host names.
 
-`operators` List of operators to apply the specification to.
+3. `operators` - List of operators to apply the specification to.
 You can use a defined `runas_alias` name as well as user names.
 
-`selinux_role` Optional selinux role to apply to the specification.
+4. `selinux_role` - Optional selinux role to apply to the specification.
 
-`selinux_type` Optional selinux type to apply to the specification.
+5. `selinux_type` - Optional selinux type to apply to the specification.
 
-`solaris_privs` Optional Solaris privset to apply to the specification.
+6. `solaris_privs` - Optional Solaris privset to apply to the specification.
 
-`solaris_limitprivs` Optional Solaris privset to apply to the specification.
+7. `solaris_limitprivs` - Optional Solaris privset to apply to the specification.
 
-`tags` Optional list of tags to apply to the specification.
+8. `tags` - Optional list of tags to apply to the specification.
 
-`commands` List of commands to apply the specification to.
+9. `commands` - List of commands to apply the specification to.
 You can use a defined `cmnd_alias` name as well as commands.
 
-#### Default Override user_specifications
-
-Supported entries:
-
-`defaults` List of defaults to override from the main configuration.
-
-`type` Type of default to override, this affects the operator in the configuration ( host -> `@`, user -> `:`, command -> `!`, and runas -> `>`).
-The type field can be one of the following values: `command`, `host`, `runas`, or `user`.
-
-`commands` Use when `type: command`.
-List of `cmnd_alias` names as well as commands to override specific default values.
-
-`hosts` Use when `type: host`.
-List of `host_alias` names as well as individual host names to override specific default values.
-
-`operators` Use when `type: runas`.
-List of `runas_alias` names as well as individual user names to override specific default values.
-
-`users` Use when `type: user`.
-List of `user_alias` names as well as individual user names to override specific default values.
-
-Example Definition:
+Example definition:
 
 ```yaml
         sudo_sudoers_files:
@@ -181,6 +158,45 @@ Example Definition:
                   - ALL
                 commands:
                   - ALL
+              - users:
+                  - "%wheel"
+                hosts:
+                  - ALL
+                operators:
+                  - ALL
+                commands:
+                  - ALL
+```
+
+#### default_overrides
+
+You can use this `list` variable to apply Default Override user_specifications to a sudoers file configuration.
+
+Supported entries:
+
+1. `defaults` - List of defaults to override from the main configuration.
+
+2. `type` - Type of default to override, this affects the operator in the configuration ( host -> `@`, user -> `:`, command -> `!`, and runas -> `>`).
+The type field can be one of the following values: `command`, `host`, `runas`, or `user`.
+
+3. `commands` - Use when `type: command`.
+List of `cmnd_alias` names as well as commands to override specific default values.
+
+4. `hosts` - Use when `type: host`.
+List of `host_alias` names as well as individual host names to override specific default values.
+
+5. `operators` - Use when `type: runas`.
+List of `runas_alias` names as well as individual user names to override specific default values.
+
+6. `users` - Use when `type: user`.
+List of `user_alias` names as well as individual user names to override specific default values.
+
+Example Definition:
+
+```yaml
+        sudo_sudoers_files:
+          - path: /etc/sudoers.d/pingers
+            default_overrides:
               - type: user
                 defaults:
                   - "!requiretty"
@@ -416,7 +432,4 @@ Example Definition:
 
 MIT
 
-## Author Information
-
-Radovan Sroka @rsroka  
-Based on[Ansible-sudoers: "https://github.com/ahuffman/ansible-sudoers"]  
+Based on [Ansible-sudoers: "https://github.com/ahuffman/ansible-sudoers"]

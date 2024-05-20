@@ -3,9 +3,5 @@
 #
 # system_role:sudo
 
-
-
-
 # Default override specifications
-Defaults: PINGERS !requiretty 
-
+Defaults: PINGERS !requiretty

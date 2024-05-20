@@ -36,17 +36,21 @@
             mode: 0644
             remote_src: true
 
-        - name: Get stat of tests/files/test_role_applied.ok
+        - name: Get stat of {{ ok_path }}
           delegate_to: localhost
+          vars:
+            ok_path: files/tests_role_applied.ok
           stat:
-            path: files/test_role_applied.ok
+            path: "{{ ok_path }}"
             checksum_algorithm: sha256
           register: sudoers_ok
 
         # sha256sum ./files/test_role_applied.ok
         - name: Check sudoers
-          command: >-
-            echo "{{ sudoers.ok.stat.checksum }} /etc/sudoers" | sha256sum --check
+          shell: >-
+            echo "{{ sudoers_ok.stat.checksum }} /etc/sudoers" |
+            sha256sum --check
+          changed_when: false
 
         - name: Restore sudoers
           copy:
