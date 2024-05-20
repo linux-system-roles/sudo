@@ -19,7 +19,7 @@ Defaults    env_keep += "LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
 
 # Alias specifications
 ## Command Aliases
-Cmnd_Alias    PING = /bin/ping
+Cmnd_Alias    PING = /usr/bin/ping
 
 
 

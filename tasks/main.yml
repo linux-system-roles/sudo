@@ -42,7 +42,7 @@
 - name: Ensure /etc/sudoers is configured
   template:
     src: sudoers.j2
-    dest: "{{ item.path  }}"
+    dest: "{{ item.path }}"
     owner: root
     group: root
     mode: 0440

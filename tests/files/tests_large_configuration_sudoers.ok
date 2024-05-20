@@ -1,6 +1,7 @@
 #
 # Ansible managed
 #
+# system_role:sudo
 
 # Default specifications
 Defaults    !visiblepw
@@ -16,9 +17,25 @@ Defaults    env_keep += "LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETAR
 Defaults    env_keep += "LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME LC_ALL"
 Defaults    env_keep += "LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
 
+# Alias specifications
+## Command Aliases
+Cmnd_Alias    PING = /usr/bin/ping
+## Host Aliases
+Host_Alias    HOST = myhost
+## Runas Aliases
+Runas_Alias    RUNAS = username
+## User Aliases
+User_Alias    PINGERS = username
+
 # User specifications
 root ALL=(ALL) ALL
 %wheel ALL=(ALL) ALL
+
+# Default override specifications
+Defaults: PINGERS !requiretty
+Defaults> root !set_logname
+Defaults@ host1, host2 !requiretty, !requiretty
+Defaults! /usr/bin/cd !requiretty
 
 # Includes
 ## Include directories

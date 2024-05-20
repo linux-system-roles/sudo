@@ -23,36 +23,36 @@
                       - /bin
                       - /usr/sbin
                       - /usr/bin
-                  - env_keep:
-                      - COLORS
-                      - DISPLAY
-                      - HOSTNAME
-                      - HISTSIZE
-                      - KDEDIR
-                      - LS_COLORS
-                      - MAIL
-                      - PS1
-                      - PS2
-                      - QTDIR
-                      - USERNAME
-                      - LANG
-                      - LC_ADDRESS
-                      - LC_CTYPE
-                      - LC_COLLATE
-                      - LC_IDENTIFICATION
-                      - LC_MEASUREMENT
-                      - LC_MESSAGES
-                      - LC_MONETARY
-                      - LC_NAME
-                      - LC_NUMERIC
-                      - LC_PAPER
-                      - LC_TELEPHONE
-                      - LC_TIME
-                      - LC_ALL
-                      - LANGUAGE
-                      - LINGUAS
-                      - _XKB_CHARSET
-                      - XAUTHORITY
+                      - env_keep:
+                          - COLORS
+                          - DISPLAY
+                          - HOSTNAME
+                          - HISTSIZE
+                          - KDEDIR
+                          - LS_COLORS
+                          - MAIL
+                          - PS1
+                          - PS2
+                          - QTDIR
+                          - USERNAME
+                          - LANG
+                          - LC_ADDRESS
+                          - LC_CTYPE
+                          - LC_COLLATE
+                          - LC_IDENTIFICATION
+                          - LC_MEASUREMENT
+                          - LC_MESSAGES
+                          - LC_MONETARY
+                          - LC_NAME
+                          - LC_NUMERIC
+                          - LC_PAPER
+                          - LC_TELEPHONE
+                          - LC_TIME
+                          - LC_ALL
+                          - LANGUAGE
+                          - LINGUAS
+                          - _XKB_CHARSET
+                          - XAUTHORITY
                 user_specifications:
                   - users:
                       - root
@@ -70,6 +70,28 @@
                       - ALL
                     commands:
                       - ALL
+                  - type: user
+                    defaults:
+                      - "!requiretty"
+                    users:
+                      - PINGERS
+                  - type: runas
+                    defaults:
+                      - "!set_logname"
+                    operators:
+                      - root
+                  - type: host
+                    defaults:
+                      - "!requiretty"
+                      - "!set_logname"
+                    hosts:
+                      - host1
+                      - host2
+                  - type: command
+                    defaults:
+                      - "!requiretty"
+                    commands:
+                      - /usr/bin/cd
                 include_directories:
                   - /etc/sudoers.d
                 aliases:
@@ -77,8 +99,16 @@
                     - name: PING
                       commands:
                         - /usr/bin/ping
+                  host_alias:
+                    - name: HOST
+                      hosts:
+                        - myhost
                   user_alias:
                     - name: PINGERS
+                      users:
+                        - username
+                  runas_alias:
+                    - name: RUNAS
                       users:
                         - username
               - path: /etc/sudoers.d/pingers
@@ -88,6 +118,23 @@
                       - "!requiretty"
                     users:
                       - PINGERS
+                  - type: runas
+                    defaults:
+                      - "!set_logname"
+                    operators:
+                      - root
+                  - type: host
+                    defaults:
+                      - "!requiretty"
+                      - "!requiretty"
+                    hosts:
+                      - host1
+                      - host2
+                  - type: command
+                    defaults:
+                      - "!requiretty"
+                    commands:
+                      - /usr/bin/ls
               - path: /etc/sudoers.d/root
                 defaults:
                   - syslog=auth
@@ -123,38 +170,38 @@
             mode: 0644
             remote_src: true
 
-        - name: Get stat of tests/files/test_multiple_sudoers_sudoers.ok
+        - name: Get stat of tests/files/test_large_configuration_sudoers.ok
           delegate_to: localhost
           stat:
-            path: files/test_multiple_sudoers_sudoers.ok
+            path: files/test_large_configuration_sudoers.ok
             checksum_algorithm: sha256
           register: sudoers_ok
 
-        # sha256sum ./files/test_multiple_sudoers_sudoers.ok
+        # sha256sum ./files/test_large_configuration_sudoers.ok
         - name: Check sudoers
           command: >-
             echo "{{ sudoers.ok.stat.checksum }} /etc/sudoers" | sha256sum --check
 
-        - name: Get stat of tests/files/test_multiple_sudoers_pingers.ok
+        - name: Get stat of tests/files/test_large_configuration_pingers.ok
           delegate_to: localhost
           stat:
-            path: files/test_multiple_sudoers_pingers.ok
+            path: files/test_large_configuration_pingers.ok
             checksum_algorithm: sha256
           register: pingers_ok
 
-        # sha256sum ./files/test_multiple_sudoers_pingers.ok
+        # sha256sum ./files/test_large_configuration_pingers.ok
         - name: Check pingers
           command: >-
             echo "{{ pingers.ok.stat.checksum }} /etc/sudoers.d/pingers" | sha256sum --check
 
-        - name: Get stat of tests/files/test_multiple_sudoers_root.ok
+        - name: Get stat of tests/files/test_large_configuration_root.ok
           delegate_to: localhost
           stat:
-            path: files/test_multiple_sudoers_root.ok
+            path: files/test_large_configuration_root.ok
             checksum_algorithm: sha256
           register: root_ok
 
-        # sha256sum ./files/test_multiple_sudoers_root.ok
+        # sha256sum ./files/test_large_configuration_root.ok
         - name: Check root
           command: >-
             echo "{{ sudoers.ok.stat.checksum }} /etc/sudoers.d/root" | sha256sum --check

@@ -75,7 +75,7 @@
               cmnd_alias:
                 - name: PING
                   commands:
-                    - /bin/ping
+                    - /usr/bin/ping
               user_alias:
                 - name: PINGERS
                   users:
