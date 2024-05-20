@@ -431,3 +431,5 @@ Example Definition:
 ## License
 
 MIT
+
+Based on [Ansible-sudoers](https://github.com/ahuffman/ansible-sudoers).
