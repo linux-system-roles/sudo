@@ -1,0 +1,174 @@
+{%- macro render_aliases(alias_desc,alias_str,alias_dict,alias_subdict_name) %}
+{%   if item.aliases[alias_dict] is defined %}
+
+## {{ alias_desc }}
+{%     for alias_item in item.aliases[alias_dict] %}
+{%       set _alias = [] %}
+{%       for alias_val in alias_item[alias_subdict_name] %}
+{%         set _ = _alias.append(alias_val) %}
+{%       endfor %}
+{{ alias_str }}    {{ alias_item.name }} = {{ _alias | join(", ") }}
+{%     endfor %}
+{%   endif %}
+{% endmacro -%}
+{%- macro render_override_spec(spec,spec_type, spec_dict, sign) %}
+{%   if spec.type == spec_type %}
+{%     set _spec_original = [] %}
+{%     set _spec_default = [] %}
+{%       for spec_original in spec[spec_dict] %}
+{%         set _ = _spec_original.append(spec_original) %}
+{%       endfor %}
+{%       for spec_default in spec.defaults %}
+{%         set _ = _spec_default.append(spec_default) %}
+{%       endfor %}
+Defaults{{ sign }} {{ _spec_original | join(", ")}} {{ _spec_default |
+  join(", ")}}
+{%    endif %}
+{% endmacro -%}
+{{ ansible_managed | default('Ansible managed') | comment }}
+{{ "system_role:sudo" | comment(prefix="", postfix="") }}
+{%- if item.defaults is defined %}
+
+# Default specifications
+{%   for default in item.defaults %}
+{%     if default is mapping %}
+{%       for name, values in default.items() %}
+{%         if name == 'secure_path' %}
+{%           set paths = [] %}
+{%           for my_value in values %}
+{%             set _ = paths.append(my_value) %}
+{%           endfor %}
+Defaults    {{ name }} = {{ paths | join(":") }}
+{%         else %}
+{%           for items in values | list | slice(6) %}
+{%             if items %}
+{%               if loop.first %}
+Defaults    {{ name }} = "{{ items | list | join(' ') }}"
+{%               else %}
+Defaults    {{ name }} += "{{ items | list | join(' ') }}"
+{%               endif -%}
+{%             endif -%}
+{%           endfor %}
+{%         endif %}
+{%       endfor %}
+{%     elif default | first == ':' %}
+Defaults{{ default }}
+{%     else %}
+Defaults    {{ default }}
+{%     endif %}
+{%   endfor %}
+{% endif -%}
+{%- if item.aliases is defined %}
+
+# Alias specifications
+{{ render_aliases("Command Aliases", "Cmnd_Alias", "cmnd_alias", "commands") -}}
+{{ render_aliases("Host Aliases", "Host_Alias", "host_alias", "hosts") -}}
+{{ render_aliases("Runas Aliases", "Runas_Alias", "runas_alias", "users") -}}
+{{ render_aliases("User Aliases", "User_Alias", "user_alias", "users") -}}
+{% endif -%}
+{%- if item.user_specifications is defined %}
+
+# User specifications
+{%   for spec in item.user_specifications %}
+{%     set user_spec = [] %}
+{%     set spec_users = [] %}
+{%     set spec_hosts = [] %}
+{%     set spec_ops = [] %}
+{%     set spec_types = [] %}
+{%     set spec_roles = [] %}
+{%     set spec_privs = [] %}
+{%     set spec_lprivs = [] %}
+{%     set spec_tags = [] %}
+{%     set spec_cmnds = [] %}
+{%     for user in spec.users %}
+{%       set _ = spec_users.append(user) %}
+{%     endfor %}
+{%     set _ = user_spec.append(spec_users | join(", ")) %}
+{%     set _ = user_spec.append(" ") %}
+{%     for host in spec.hosts %}
+{%       set _ = spec_hosts.append(host) %}
+{%     endfor %}
+{%     set _ = user_spec.append(spec_hosts | join(", ")) %}
+{%     set _ = user_spec.append("=") %}
+{%     if spec.operators is defined %}
+{%       set _ = user_spec.append("(") %}
+{%       for op in spec.operators %}
+{%         set _ = spec_ops.append(op) %}
+{%       endfor %}
+{%     set _ = user_spec.append(spec_ops | join(", ")) %}
+{%     set _ = user_spec.append(")") %}
+{%     endif %}
+{%     set _ = user_spec.append(" ") %}
+{%     if spec.selinux_type is defined %}
+{%       set _ = user_spec.append("TYPE=") %}
+{%       for type in spec.selinux_type %}
+{%         set _ = spec_types.append(type) %}
+{%       endfor %}
+{%       set _ = user_spec.append(spec_types | join(", ")) %}
+{%       set _ = user_spec.append(" ") %}
+{%     endif %}
+{%     if spec.selinux_role is defined %}
+{%       set _ = user_spec.append("ROLE=") %}
+{%       for role in spec.selinux_role %}
+{%         set _ = spec_roles.append(role) %}
+{%       endfor %}
+{%       set _ = user_spec.append(spec_roles | join(", ")) %}
+{%       set _ = user_spec.append(" ") %}
+{%     endif %}
+{%     if spec.solaris_privs is defined %}
+{%       set _ = user_spec.append("PRIVS=") %}
+{%       for priv in spec.solaris_privs %}
+{%         set _ = spec_privs.append(priv) %}
+{%       endfor %}
+{%       set _ = user_spec.append(spec_privs | join(", ")) %}
+{%       set _ = user_spec.append(" ") %}
+{%     endif %}
+{%     if spec.solaris_limitprivs is defined %}
+{%       set _ = user_spec.append("LIMITPRIVS=") %}
+{%       for lpriv in spec.solaris_limitprivs %}
+{%         set _ = spec_lprivs.append(lpriv) %}
+{%       endfor %}
+{%       set _ = user_spec.append(spec_lprivs | join(", ")) %}
+{%       set _ = user_spec.append(" ") %}
+{%     endif %}
+{%     if spec.tags is defined %}
+{%       for tag in spec.tags %}
+{%         set _ = spec_tags.append(tag) %}
+{%       endfor %}
+{%       set _ = user_spec.append(spec_tags | join(":")) %}
+{%       set _ = user_spec.append(": ") %}
+{%     endif %}
+{%     for cmnd in spec.commands %}
+{%       set _ = spec_cmnds.append(cmnd) %}
+{%     endfor %}
+{%     set _ = user_spec.append(spec_cmnds | join(", ")) %}
+{{ user_spec | join('') }}
+{%   endfor %}
+{% endif -%}
+{%- if item.default_overrides is defined %}
+
+# Default override specifications
+{%   for spec in item.default_overrides %}
+{{ render_override_spec(spec,"user","users",":") -}}
+{{ render_override_spec(spec,"runas","operators",">") -}}
+{{ render_override_spec(spec,"host","hosts","@") -}}
+{{ render_override_spec(spec,"command","commands","!") -}}
+{%   endfor %}
+{%- endif %}
+{%- if item.include_files is defined or item.include_directories is defined %}
+
+# Includes
+{%   if item.include_files is defined and item.include_files | length > 0 %}
+## Include files
+{%     for file in item.include_files %}
+#include {{ file }}
+{%     endfor %}
+{%   endif %}
+{%   if item.include_directories is defined and item.include_directories | 
+       length > 0 %}
+## Include directories
+{%     for dir in item.include_directories %}
+#includedir {{ dir }}
+{%     endfor %}
+{%   endif %}
+{% endif -%}

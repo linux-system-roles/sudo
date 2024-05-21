@@ -1,0 +1,10 @@
+#
+# Ansible managed
+#
+# system_role:sudo
+
+# Default override specifications
+Defaults: PINGERS !requiretty
+Defaults> root !set_logname
+Defaults@ host1, host2 !requiretty, !requiretty
+Defaults! /usr/bin/ls !requiretty

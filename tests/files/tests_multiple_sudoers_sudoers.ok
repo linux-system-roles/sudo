@@ -1,0 +1,34 @@
+#
+# Ansible managed
+#
+# system_role:sudo
+
+# Default specifications
+Defaults    !visiblepw
+Defaults    always_set_home
+Defaults    match_group_by_gid
+Defaults    always_query_group_plugin
+Defaults    env_reset
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin
+Defaults    env_keep = "COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR"
+Defaults    env_keep += "LS_COLORS MAIL PS1 PS2 QTDIR"
+Defaults    env_keep += "USERNAME LANG LC_ADDRESS LC_CTYPE LC_COLLATE"
+Defaults    env_keep += "LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY LC_NAME"
+Defaults    env_keep += "LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME LC_ALL"
+Defaults    env_keep += "LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
+
+# Alias specifications
+
+## Command Aliases
+Cmnd_Alias    PING = /usr/bin/ping
+
+## User Aliases
+User_Alias    PINGERS = username
+
+# User specifications
+root ALL=(ALL) ALL
+%wheel ALL=(ALL) ALL
+
+# Includes
+## Include directories
+#includedir /etc/sudoers.d

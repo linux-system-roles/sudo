@@ -21,4 +21,4 @@ exclude_paths:
   - .markdownlint.yaml
   - examples/roles/
 mock_roles:
-  - linux-system-roles.template
+  - linux-system-roles.sudo

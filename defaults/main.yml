@@ -1,8 +1,70 @@
-# SPDX-License-Identifier: MIT
 ---
-# Here is the right place to put the role's input variables.
-# This file also serves as a documentation for such a variables.
+sudo_rewrite_default_sudoers_file: true
+sudo_remove_unauthorized_included_files: false
 
-# Examples of role input variables:
-template_foo: foo
-template_bar: true
+sudo_visudo_path: /usr/sbin/visudo
+
+sudo_sudoers_files:
+  - path: /etc/sudoers
+    defaults:
+      - "!visiblepw"
+      - always_set_home
+      - match_group_by_gid
+      - always_query_group_plugin
+      - env_reset
+      - secure_path:
+          - /sbin
+          - /bin
+          - /usr/sbin
+          - /usr/bin
+      - env_keep:
+          - COLORS
+          - DISPLAY
+          - HOSTNAME
+          - HISTSIZE
+          - KDEDIR
+          - LS_COLORS
+          - MAIL
+          - PS1
+          - PS2
+          - QTDIR
+          - USERNAME
+          - LANG
+          - LC_ADDRESS
+          - LC_CTYPE
+          - LC_COLLATE
+          - LC_IDENTIFICATION
+          - LC_MEASUREMENT
+          - LC_MESSAGES
+          - LC_MONETARY
+          - LC_NAME
+          - LC_NUMERIC
+          - LC_PAPER
+          - LC_TELEPHONE
+          - LC_TIME
+          - LC_ALL
+          - LANGUAGE
+          - LINGUAS
+          - _XKB_CHARSET
+          - XAUTHORITY
+    user_specifications:
+      - users:
+          - root
+        hosts:
+          - ALL
+        operators:
+          - ALL
+        commands:
+          - ALL
+      - users:
+          - "%wheel"
+        hosts:
+          - ALL
+        operators:
+          - ALL
+        commands:
+          - ALL
+    include_directories:
+      - /etc/sudoers.d
+    # include_files: []
+    # aliases: []

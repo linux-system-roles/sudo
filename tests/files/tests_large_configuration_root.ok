@@ -1,0 +1,10 @@
+#
+# Ansible managed
+#
+# system_role:sudo
+
+# Default specifications
+Defaults    syslog=auth
+
+# Default override specifications
+Defaults> root !set_logname

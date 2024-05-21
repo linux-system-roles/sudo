@@ -1,27 +1,81 @@
-# SPDX-License-Identifier: MIT
 ---
-- name: Set platform/version specific variables
-  include_tasks: tasks/set_vars.yml
-
-# Examples of some tasks:
-- name: Ensure required packages are installed
+- name: Ensure sudo is installed
   package:
-    name: "{{ __template_packages }}"
+    name: sudo
     state: present
-    use: "{{ (__template_is_ostree | d(false)) |
-             ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
-- name: Ensure required services are enabled and started
-  service:
-    name: "{{ item }}"
-    state: started
-    enabled: true
-  loop: "{{ __template_services }}"
+- name: Set include directories variable
+  set_fact:
+    sudo_include_dirs: "{{ sudo_sudoers_files
+      | selectattr('include_directories', 'defined')
+      | map(attribute='include_directories') | flatten }}"
 
-- name: Generate /etc/{{ __template_foo_config }}
+- name: Set sudoer file paths variable
+  set_fact:
+    sudo_file_paths: "{{ sudo_sudoers_files
+      | selectattr('path', 'defined')
+      | map(attribute='path') | flatten }}"
+
+- name: Ensure include directories are created
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0750
+    state: directory
+  with_items: "{{ sudo_include_dirs }}"
+  when: sudo_include_dirs | length > 0
+
+- name: Ensure sudoers include files are configured
   template:
-    src: "{{ __template_foo_config }}.j2"
-    dest: /etc/{{ __template_foo_config }}
-    backup: true
-    mode: 0400
-  notify: Handler for template to restart services
+    src: sudoers.j2
+    dest: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: 0440
+    validate: "{{ sudo_visudo_path }} -cf %s"
+  with_items: "{{ sudo_sudoers_files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: item.path != '/etc/sudoers'
+
+- name: Ensure /etc/sudoers is configured
+  template:
+    src: sudoers.j2
+    dest: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: 0440
+    validate: "{{ sudo_visudo_path }} -cf %s"
+  with_items: "{{ sudo_sudoers_files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - item.path == '/etc/sudoers'
+    - sudo_rewrite_default_sudoers_file | bool
+
+- name: Remove unauthorized included sudoer files
+  when:
+    - sudo_remove_unauthorized_included_files | bool
+    - sudo_include_dirs | length > 0
+  block:
+    - name: Search for sudoers files in included directories
+      find:
+        paths: "{{ sudo_include_dirs }}"
+        recurse: true
+        hidden: true
+        file_type: any
+      register: sudo_existing_included_files
+
+    - name: Set unauthorized included sudoers files variable
+      set_fact:
+        sudo_unauthorized_files: "{{ sudo_existing_included_files['files']
+        | selectattr('path', 'defined') | map(attribute='path')
+        | flatten | difference(sudo_file_paths) }}"
+
+    - name: Remove unauthorized included sudoers files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items: "{{ sudo_unauthorized_files }}"
+      when: sudo_unauthorized_files | length > 0
