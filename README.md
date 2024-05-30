@@ -9,7 +9,13 @@ Consider reading sudo documentation before setting it up.
 
 ### Collection requirements
 
-None.
+The role requires external collections only for management of `rpm-ostree`
+nodes. Please run the following command to install them if you need to manage
+`rpm-ostree` nodes:
+
+```bash
+ansible-galaxy collection install -vv -r meta/collection-requirements.yml
+```
 
 ## Role Variables
 
@@ -30,8 +36,8 @@ Type: `bool`
 ***Dangerous!*** Setting this to `true` removes each existing sudoers file in the `include_directories` dictionary that are not defined in the`sudo_sudoers_files` variable.
 This allows for enforcing a desired state.
 
-Default: `false`  
-Type: `bool`  
+Default: `false`
+Type: `bool`
 
 ### sudo_visudo_path
 
@@ -114,7 +120,7 @@ Optional, a list of directories that your configurations must include.
 
 This is a list of fully-qualified paths to directories to include via the `#includedir` option of a sudoers configuration.
 
-Type: `list`  
+Type: `list`
 
 #### user_specifications
 
@@ -147,25 +153,25 @@ You can use a defined `cmnd_alias` name as well as commands.
 Example definition:
 
 ```yaml
-        sudo_sudoers_files:
-          - path: /etc/sudoers.d/pingers
-            user_specifications:
-              - users:
-                  - root
-                hosts:
-                  - ALL
-                operators:
-                  - ALL
-                commands:
-                  - ALL
-              - users:
-                  - "%wheel"
-                hosts:
-                  - ALL
-                operators:
-                  - ALL
-                commands:
-                  - ALL
+sudo_sudoers_files:
+  - path: /etc/sudoers.d/pingers
+    user_specifications:
+      - users:
+          - root
+        hosts:
+          - ALL
+        operators:
+          - ALL
+        commands:
+          - ALL
+      - users:
+          - "%wheel"
+        hosts:
+          - ALL
+        operators:
+          - ALL
+        commands:
+          - ALL
 ```
 
 #### default_overrides
@@ -194,31 +200,31 @@ List of `user_alias` names as well as individual user names to override specific
 Example Definition:
 
 ```yaml
-        sudo_sudoers_files:
-          - path: /etc/sudoers.d/pingers
-            default_overrides:
-              - type: user
-                defaults:
-                  - "!requiretty"
-                users:
-                  - PINGERS
-              - type: runas
-                defaults:
-                  - "!set_logname"
-                operators:
-                  - root
-              - type: host
-                defaults:
-                  - "!requiretty"
-                  - "!requiretty"
-                hosts:
-                  - host1
-                  - host2
-              - type: command
-                defaults:
-                  - "!requiretty"
-                commands:
-                  - /usr/bin/ls
+sudo_sudoers_files:
+  - path: /etc/sudoers.d/pingers
+    default_overrides:
+      - type: user
+        defaults:
+          - "!requiretty"
+        users:
+          - PINGERS
+      - type: runas
+        defaults:
+          - "!set_logname"
+        operators:
+          - root
+      - type: host
+        defaults:
+          - "!requiretty"
+          - "!requiretty"
+        hosts:
+          - host1
+          - host2
+      - type: command
+        defaults:
+          - "!requiretty"
+        commands:
+          - /usr/bin/ls
 ```
 
 ## Example Playbooks
@@ -241,16 +247,16 @@ Example Definition:
   hosts: all
   vars:
     sudoers_files:
-     - path: /etc/sudoers
-     user_specifications:
-      - users:
-        - root
-        hosts:
-          - x
-        commands:
-          - /usr/bin/ls
+      - path: /etc/sudoers
+        user_specifications:
+          - users:
+              - root
+            hosts:
+              - x
+            commands:
+              - /usr/bin/ls
   roles:
-  - role: linux-system-roles.sudo
+    - role: linux-system-roles.sudo
 ```
 
 ### Applying defaults
@@ -427,6 +433,10 @@ Example Definition:
                 operators:
                   - root
 ```
+
+## rpm-ostree
+
+See README-ostree.md
 
 ## License
 

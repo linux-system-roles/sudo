@@ -1,8 +1,13 @@
 ---
+- name: Set version specific variables
+  include_tasks: set_vars.yml
+
 - name: Ensure sudo is installed
   package:
-    name: sudo
+    name: "{{ __sudo_packages }}"
     state: present
+    use: "{{ (__sudo_is_ostree | d(false)) |
+             ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
 - name: Set include directories variable
   set_fact:
@@ -37,7 +42,7 @@
   with_items: "{{ sudo_sudoers_files }}"
   loop_control:
     label: "{{ item.path }}"
-  when: item.path != '/etc/sudoers'
+  when: item.path != "/etc/sudoers"
 
 - name: Ensure /etc/sudoers is configured
   template:
@@ -51,7 +56,7 @@
   loop_control:
     label: "{{ item.path }}"
   when:
-    - item.path == '/etc/sudoers'
+    - item.path == "/etc/sudoers"
     - sudo_rewrite_default_sudoers_file | bool
 
 - name: Remove unauthorized included sudoer files
@@ -70,8 +75,8 @@
     - name: Set unauthorized included sudoers files variable
       set_fact:
         sudo_unauthorized_files: "{{ sudo_existing_included_files['files']
-        | selectattr('path', 'defined') | map(attribute='path')
-        | flatten | difference(sudo_file_paths) }}"
+          | selectattr('path', 'defined') | map(attribute='path')
+          | flatten | difference(sudo_file_paths) }}"
 
     - name: Remove unauthorized included sudoers files
       file:

@@ -1,9 +1,12 @@
 ---
-- name: Basic test for Sudo
+- name: Test multiple sudoers
   hosts: all
   tasks:
     - name: Run tests
       block:
+        - name: Test setup
+          include_tasks: tasks/setup.yml
+
         - name: Run the role
           include_role:
             name: linux-system-roles.sudo
@@ -98,31 +101,6 @@
                     operators:
                       - root
 
-        - name: Create temp test directory
-          tempfile:
-            path: /var/tmp
-            prefix: sudo_
-            state: directory
-          register: __sudo_tmpdir
-
-        - name: Backup sudoers
-          copy:
-            src: /etc/sudoers
-            dest: "{{ __sudo_tmpdir.path }}/sudoers"
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
-        - name: Backup sudoers.d
-          copy:
-            src: /etc/sudoers.d
-            dest: "{{ __sudo_tmpdir.path }}/sudoers.d"
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
         - name: Get stat of {{ ok_path }}
           delegate_to: localhost
           vars:
@@ -150,25 +128,6 @@
             __sudo_ok_path: files/tests_multiple_sudoers_root.ok
             __sudo_test_path: /etc/sudoers.d/root
 
-        - name: Restore sudoers
-          copy:
-            src: "{{ __sudo_tmpdir.path }}/sudoers"
-            dest: /etc/sudoers
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
-        - name: Restore sudoers.d
-          copy:
-            src: "{{ __sudo_tmpdir.path }}/sudoers.d"
-            dest: /etc/sudoers.d
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
-        - name: Clean up temp directory
-          file:
-            path: "{{ __sudo_tmpdir.path }}"
-            state: absent
+      always:
+        - name: Test cleanup
+          include_tasks: tasks/cleanup.yml
