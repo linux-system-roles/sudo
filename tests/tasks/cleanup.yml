@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Restore sudoers
+  copy:
+    src: "{{ __sudo_tmpdir.path }}/sudoers"
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+
+- name: Restore sudoers.d
+  copy:
+    src: "{{ __sudo_tmpdir.path }}/sudoers.d"
+    dest: /etc/sudoers.d
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+
+- name: Clean up temp directory
+  file:
+    path: "{{ __sudo_tmpdir.path }}"
+    state: absent

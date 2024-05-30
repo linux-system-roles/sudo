@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Create temp test directory
+  tempfile:
+    path: /var/tmp
+    prefix: sudo_
+    state: directory
+  register: __sudo_tmpdir
+
+- name: Backup sudoers
+  copy:
+    src: /etc/sudoers
+    dest: "{{ __sudo_tmpdir.path }}/sudoers"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+
+- name: Backup sudoers.d
+  copy:
+    src: /etc/sudoers.d
+    dest: "{{ __sudo_tmpdir.path }}/sudoers.d"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true

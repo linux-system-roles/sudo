@@ -21,8 +21,8 @@
 {%       for spec_default in spec.defaults %}
 {%         set _ = _spec_default.append(spec_default) %}
 {%       endfor %}
-Defaults{{ sign }} {{ _spec_original | join(", ")}} {{ _spec_default |
-  join(", ")}}
+Defaults{{ sign }} {{ _spec_original | join(", ") }} {{ _spec_default |
+  join(", ") }}
 {%    endif %}
 {% endmacro -%}
 {{ ansible_managed | default('Ansible managed') | comment }}
@@ -164,7 +164,7 @@ Defaults    {{ default }}
 #include {{ file }}
 {%     endfor %}
 {%   endif %}
-{%   if item.include_directories is defined and item.include_directories | 
+{%   if item.include_directories is defined and item.include_directories |
        length > 0 %}
 ## Include directories
 {%     for dir in item.include_directories %}

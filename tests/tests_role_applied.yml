@@ -1,9 +1,12 @@
 ---
-- name: Basic test for Sudo
+- name: Test rewrite default sudoers and remove unauthorized files
   hosts: all
   tasks:
     - name: Run tests
       block:
+        - name: Test setup
+          include_tasks: tasks/setup.yml
+
         - name: Run the role
           include_role:
             name: linux-system-roles.sudo
@@ -11,56 +14,12 @@
             sudo_rewrite_default_sudoers_file: true
             sudo_remove_unauthorized_included_files: true
 
-        - name: Create temp test directory
-          tempfile:
-            path: /var/tmp
-            prefix: sudo_
-            state: directory
-          register: __sudo_tmpdir
-
-        - name: Backup sudoers
-          copy:
-            src: /etc/sudoers
-            dest: "{{ __sudo_tmpdir.path }}/sudoers"
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
-        - name: Backup sudoers.d
-          copy:
-            src: /etc/sudoers.d
-            dest: "{{ __sudo_tmpdir.path }}/sudoers.d"
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
         - name: Check sudoers
           include_tasks: tasks/assert_files_identical.yml
           vars:
             __sudo_ok_path: files/tests_role_applied.ok
             __sudo_test_path: /etc/sudoers
 
-        - name: Restore sudoers
-          copy:
-            src: "{{ __sudo_tmpdir.path }}/sudoers"
-            dest: /etc/sudoers
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
-        - name: Restore sudoers.d
-          copy:
-            src: "{{ __sudo_tmpdir.path }}/sudoers.d"
-            dest: /etc/sudoers.d
-            owner: root
-            group: root
-            mode: "0644"
-            remote_src: true
-
-        - name: Clean up temp directory
-          file:
-            path: "{{ __sudo_tmpdir.path }}"
-            state: absent
+      always:
+        - name: Test cleanup
+          include_tasks: tasks/cleanup.yml
