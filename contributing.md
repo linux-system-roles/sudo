@@ -1,4 +1,4 @@
-# Contributing to the Sudo Linux System Role
+# Contributing to the sudo Linux System Role
 
 ## Where to start
 
