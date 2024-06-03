@@ -24,7 +24,7 @@
             dest: "{{ __sudo_tmpdir.path }}/sudoers"
             owner: root
             group: root
-            mode: 0644
+            mode: "0644"
             remote_src: true
 
         - name: Backup sudoers.d
@@ -33,7 +33,7 @@
             dest: "{{ __sudo_tmpdir.path }}/sudoers.d"
             owner: root
             group: root
-            mode: 0644
+            mode: "0644"
             remote_src: true
 
         - name: Check sudoers
@@ -48,7 +48,7 @@
             dest: /etc/sudoers
             owner: root
             group: root
-            mode: 0644
+            mode: "0644"
             remote_src: true
 
         - name: Restore sudoers.d
@@ -57,7 +57,7 @@
             dest: /etc/sudoers.d
             owner: root
             group: root
-            mode: 0644
+            mode: "0644"
             remote_src: true
 
         - name: Clean up temp directory

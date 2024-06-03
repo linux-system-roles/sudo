@@ -66,5 +66,5 @@ sudo_sudoers_files:
           - ALL
     include_directories:
       - /etc/sudoers.d
-    # include_files: []
-    # aliases: []
+  # include_files: []
+  # aliases: []

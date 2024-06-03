@@ -21,7 +21,7 @@
     path: "{{ item }}"
     owner: root
     group: root
-    mode: 0750
+    mode: "0750"
     state: directory
   with_items: "{{ sudo_include_dirs }}"
   when: sudo_include_dirs | length > 0
@@ -32,7 +32,7 @@
     dest: "{{ item.path }}"
     owner: root
     group: root
-    mode: 0440
+    mode: "0440"
     validate: "{{ sudo_visudo_path }} -cf %s"
   with_items: "{{ sudo_sudoers_files }}"
   loop_control:
@@ -45,7 +45,7 @@
     dest: "{{ item.path }}"
     owner: root
     group: root
-    mode: 0440
+    mode: "0440"
     validate: "{{ sudo_visudo_path }} -cf %s"
   with_items: "{{ sudo_sudoers_files }}"
   loop_control:
