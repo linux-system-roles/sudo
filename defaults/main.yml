@@ -4,6 +4,8 @@ sudo_remove_unauthorized_included_files: false
 
 sudo_visudo_path: /usr/sbin/visudo
 
+sudo_transactional_update_reboot_ok: null
+
 sudo_sudoers_files:
   - path: /etc/sudoers
     defaults:

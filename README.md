@@ -48,6 +48,18 @@ Default: `/usr/bin/visudo`
 
 Type: `string`
 
+### sudo_transactional_update_reboot_ok
+
+This variable is used to handle reboots required by transactional updates.
+If a transactional update requires a reboot, the role will proceed with the
+reboot if `sudo_transactional_update_reboot_ok` is set to `true`. If set
+to `false`, the role will notify the user that a reboot is required, allowing
+for custom handling of the reboot requirement. If this variable is not set,
+the role will fail to ensure the reboot requirement is not overlooked.
+
+Default: `null`
+Type: `bool`
+
 ### sudo_sudoers_files
 
 A list that defines sudoers configurations.
@@ -414,8 +426,8 @@ sudo_sudoers_files:
                     - /usr/bin/ping
               user_alias:
                 - name: PINGERS
-                users:
-                  - username
+                  users:
+                    - username
           - path: /etc/sudoers.d/pingers
             user_specifications:
             - type: user
