@@ -8,6 +8,30 @@
     state: present
     use: "{{ (__sudo_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+  register: sudo_package_result
+
+- name: Handle reboot for transactional update systems
+  when:
+    - __sudo_is_transactional | d(false)
+    - sudo_package_result is changed
+  block:
+    - name: Notify user that reboot is needed to apply changes
+      debug:
+        msg: >
+          Reboot required to apply changes due to transactional updates.
+
+    - name: Reboot transactional update systems
+      reboot:
+        msg: Rebooting the system to apply transactional update changes.
+      when: sudo_transactional_update_reboot_ok | bool
+
+    - name: Fail if reboot is needed and not set
+      fail:
+        msg: >
+          Reboot is required but not allowed. Please set
+          'sudo_transactional_update_reboot_ok' to proceed.
+      when:
+        - sudo_transactional_update_reboot_ok is none
 
 - name: Set include directories variable
   set_fact:
