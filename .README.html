@@ -148,6 +148,8 @@ id="toc-sudo_rewrite_default_sudoers_file">sudo_rewrite_default_sudoers_file</a>
 id="toc-sudo_remove_unauthorized_included_files">sudo_remove_unauthorized_included_files</a></li>
 <li><a href="#sudo_visudo_path"
 id="toc-sudo_visudo_path">sudo_visudo_path</a></li>
+<li><a href="#sudo_transactional_update_reboot_ok"
+id="toc-sudo_transactional_update_reboot_ok">sudo_transactional_update_reboot_ok</a></li>
 <li><a href="#sudo_sudoers_files"
 id="toc-sudo_sudoers_files">sudo_sudoers_files</a>
 <ul>
@@ -222,6 +224,17 @@ validation of sudoers configuration changes Added for Operating System
 compatibility.</p>
 <p>Default: <code>/usr/bin/visudo</code></p>
 <p>Type: <code>string</code></p>
+<h2
+id="sudo_transactional_update_reboot_ok">sudo_transactional_update_reboot_ok</h2>
+<p>This variable is used to handle reboots required by transactional
+updates. If a transactional update requires a reboot, the role will
+proceed with the reboot if
+<code>sudo_transactional_update_reboot_ok</code> is set to
+<code>true</code>. If set to <code>false</code>, the role will notify
+the user that a reboot is required, allowing for custom handling of the
+reboot requirement. If this variable is not set, the role will fail to
+ensure the reboot requirement is not overlooked.</p>
+<p>Default: <code>null</code> Type: <code>bool</code></p>
 <h2 id="sudo_sudoers_files">sudo_sudoers_files</h2>
 <p>A list that defines sudoers configurations.</p>
 <p>For the default configuration, see <a
@@ -569,8 +582,8 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="
 <span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a><span class="at">                    </span><span class="kw">-</span><span class="at"> /usr/bin/ping</span></span>
 <span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">user_alias</span><span class="kw">:</span></span>
 <span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> PINGERS</span></span>
-<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">users</span><span class="kw">:</span></span>
-<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a><span class="at">                  </span><span class="kw">-</span><span class="at"> username</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a><span class="at">                  </span><span class="fu">users</span><span class="kw">:</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a><span class="at">                    </span><span class="kw">-</span><span class="at"> username</span></span>
 <span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /etc/sudoers.d/pingers</span></span>
 <span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">user_specifications</span><span class="kw">:</span></span>
 <span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">type</span><span class="kw">:</span><span class="at"> user</span></span>
@@ -606,6 +619,9 @@ alt="markdownlint.yml" /></a> <a
 href="https://github.com/linux-system-roles/sudo/actions/workflows/shellcheck.yml"><img
 src="https://github.com/linux-system-roles/sudo/actions/workflows/shellcheck.yml/badge.svg"
 alt="shellcheck.yml" /></a> <a
+href="https://github.com/linux-system-roles/sudo/actions/workflows/tft.yml"><img
+src="https://github.com/linux-system-roles/sudo/actions/workflows/tft.yml/badge.svg"
+alt="tft.yml" /></a> <a
 href="https://github.com/linux-system-roles/sudo/actions/workflows/woke.yml"><img
 src="https://github.com/linux-system-roles/sudo/actions/workflows/woke.yml/badge.svg"
 alt="woke.yml" /></a></p>

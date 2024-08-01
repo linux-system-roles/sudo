@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.1.0] - 2024-08-01
+--------------------
+
+### New Features
+
+- Handle reboot for transactional update systems (#16)
+
+### Other Changes
+
+- ci: Add tft plan and workflow (#14)
+- ci: Update fmf plan to add a separate job to prepare managed nodes (#17)
+- ci: bump sclorg/testing-farm-as-github-action from 2 to 3 (#18)
+
 [1.0.1] - 2024-07-02
 --------------------
 
