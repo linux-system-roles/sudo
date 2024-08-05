@@ -31,6 +31,14 @@ Default: `true`
 
 Type: `bool`
 
+### sudo_check_if_configured
+
+This variable provides semantic check of already configured sudoers in case ansible setup is not needed and it is skipped.
+
+Default: `true`
+
+Type: `bool`
+
 ### sudo_remove_unauthorized_included_files
 
 ***Dangerous!*** Setting this to `true` removes each existing sudoers file in the `include_directories` dictionary that are not defined in the`sudo_sudoers_files` variable.

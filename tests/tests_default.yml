@@ -12,9 +12,11 @@
         - name: Run the role
           include_role:
             name: linux-system-roles.sudo
+          vars:
+            sudo_check_if_configured: false
 
         - name: Check header for ansible_managed, fingerprint
-          include_tasks: tasks/check_header.yml
+          include_tasks: tasks/check_present_header.yml
           vars:
             __file: /etc/sudoers
             __fingerprint: system_role:sudo

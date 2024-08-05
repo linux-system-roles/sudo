@@ -2,6 +2,26 @@
 - name: Set version specific variables
   include_tasks: set_vars.yml
 
+- name: Scan sudoers
+  scan_sudoers:
+    output_parsed_configs: true
+    output_raw_configs: false
+#  no_log: true
+  when: sudo_check_if_configured | bool
+
+- name: Compare
+  set_fact:
+    comparison_result: "{{ ansible_facts['sudoers'].sudoers_files
+              | combine({'include_files': omit})
+              == sudo_sudoers_files }}"
+  when: sudo_check_if_configured | bool
+
+- name: Sudo is already configured
+  ansible.builtin.meta: end_host
+  when:
+    - (comparison_result | default(false))  | bool
+    - sudo_check_if_configured | bool
+
 - name: Ensure sudo is installed
   package:
     name: "{{ __sudo_packages }}"
