@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Ensure that the role runs with default parameters
+  hosts: all
+  gather_facts: false  # test that role works in this case
+  tasks:
+    - name: Run tests
+      block:
+        - name: Test setup
+          include_tasks: tasks/setup.yml
+
+
+        - name: Install new sudoers file
+          ansible.builtin.copy:
+            src: files/tests_default_sudoers.in  # Local file path
+            dest: /etc/sudoers              # Target file path on the remote system
+            owner: root
+            group: root
+            mode: '0440'                    # Correct permission for the sudoers file
+
+
+        - name: print file
+          command: cat /etc/sudoers
+
+
+        - name: Check if the directory exists
+          stat:
+            path: /path/to/directory
+          register: dir_stat
+
+
+        - name: Remove all files from sudoers.d directory
+          ansible.builtin.file:
+              path: /etc/sudoers.d
+              state: absent                   # Recursively remove the entire directory
+          when: dir_stat.stat.exists
+
+
+        - name: Run the role
+          include_role:
+            name: linux-system-roles.sudo
+          vars:
+            sudo_check_if_configured: true
+
+        - name: Check header for ansible_managed, fingerprint
+          include_tasks: tasks/check_not_present_header.yml
+          vars:
+            __file: /etc/sudoers
+            __fingerprint: system_role:sudo
+
+      always:
+        - name: Test cleanup
+          include_tasks: tasks/cleanup.yml

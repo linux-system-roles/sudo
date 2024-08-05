@@ -2,6 +2,8 @@
 sudo_rewrite_default_sudoers_file: true
 sudo_remove_unauthorized_included_files: false
 
+sudo_check_if_configured: true
+
 sudo_visudo_path: /usr/sbin/visudo
 
 sudo_transactional_update_reboot_ok: null
