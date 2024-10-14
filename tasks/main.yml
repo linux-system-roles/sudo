@@ -9,18 +9,14 @@
 #  no_log: true
   when: sudo_check_if_configured | bool
 
-- name: Compare
-  set_fact:
-    comparison_result: "{{ ansible_facts['sudoers'].sudoers_files
-              | combine({'include_files': omit})
-              == sudo_sudoers_files }}"
-  when: sudo_check_if_configured | bool
-
-- name: Sudo is already configured
+- name: Sudo is already configured - skip rest of role
   ansible.builtin.meta: end_host
   when:
-    - (comparison_result | default(false))  | bool
+    - __actual == sudo_sudoers_files
     - sudo_check_if_configured | bool
+  vars:
+    __actual: "{{ ansible_facts['sudoers'].sudoers_files | map('dict2items') |
+      map('rejectattr', 'key', 'match', '^include_files$') | map('items2dict') }}"
 
 - name: Ensure sudo is installed
   package:

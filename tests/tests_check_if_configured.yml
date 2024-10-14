@@ -9,7 +9,6 @@
         - name: Test setup
           include_tasks: tasks/setup.yml
 
-
         - name: Install new sudoers file
           ansible.builtin.copy:
             src: files/tests_default_sudoers.in  # Local file path
@@ -18,23 +17,19 @@
             group: root
             mode: '0440'                    # Correct permission for the sudoers file
 
-
-        - name: print file
+        - name: Print file
           command: cat /etc/sudoers
-
-
-        - name: Check if the directory exists
-          stat:
-            path: /path/to/directory
-          register: dir_stat
-
+          changed_when: false
 
         - name: Remove all files from sudoers.d directory
-          ansible.builtin.file:
-              path: /etc/sudoers.d
-              state: absent                   # Recursively remove the entire directory
-          when: dir_stat.stat.exists
-
+          shell: |
+            set -euxo pipefail
+            for file in /etc/sudoers.d/*; do
+              if [ -f "$file" ]; then
+                rm "$file"
+              fi
+            done
+          changed_when: true
 
         - name: Run the role
           include_role:
@@ -42,7 +37,7 @@
           vars:
             sudo_check_if_configured: true
 
-        - name: Check header for ansible_managed, fingerprint
+        - name: Check that there is no header for ansible_managed, fingerprint
           include_tasks: tasks/check_not_present_header.yml
           vars:
             __file: /etc/sudoers
