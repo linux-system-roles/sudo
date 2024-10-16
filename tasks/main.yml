@@ -7,7 +7,7 @@
     output_parsed_configs: true
     output_raw_configs: false
 #  no_log: true
-  when: sudo_check_if_configured | bool
+#  when: sudo_check_if_configured | bool
 
 - name: Sudo is already configured - skip rest of role
   ansible.builtin.meta: end_host
