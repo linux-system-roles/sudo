@@ -144,6 +144,8 @@ id="toc-collection-requirements">Collection requirements</a></li>
 <ul>
 <li><a href="#sudo_rewrite_default_sudoers_file"
 id="toc-sudo_rewrite_default_sudoers_file">sudo_rewrite_default_sudoers_file</a></li>
+<li><a href="#sudo_check_if_configured"
+id="toc-sudo_check_if_configured">sudo_check_if_configured</a></li>
 <li><a href="#sudo_remove_unauthorized_included_files"
 id="toc-sudo_remove_unauthorized_included_files">sudo_remove_unauthorized_included_files</a></li>
 <li><a href="#sudo_visudo_path"
@@ -208,6 +210,11 @@ definition, replacing your distribution supplied
 <code>/etc/sudoers</code> file. Useful when attempting to deploy new
 configuration files to the <code>include_directories</code> and you do
 not wish to modify the <code>/etc/sudoers</code> file.</p>
+<p>Default: <code>true</code></p>
+<p>Type: <code>bool</code></p>
+<h2 id="sudo_check_if_configured">sudo_check_if_configured</h2>
+<p>This variable provides semantic check of already configured sudoers
+in case ansible setup is not needed and it is skipped.</p>
 <p>Default: <code>true</code></p>
 <p>Type: <code>bool</code></p>
 <h2
