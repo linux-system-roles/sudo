@@ -16,7 +16,8 @@
     - sudo_check_if_configured | bool
   vars:
     __actual: "{{ ansible_facts['sudoers'].sudoers_files | map('dict2items') |
-      map('rejectattr', 'key', 'match', '^include_files$') | map('items2dict') }}"
+      map('rejectattr', 'key', 'match', '^include_files$') | map('list') |
+      map('items2dict') | list }}"
 
 - name: Ensure sudo is installed
   package:
