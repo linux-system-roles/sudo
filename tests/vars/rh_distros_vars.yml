@@ -1,17 +1,6 @@
-# SPDX-License-Identifier: MIT
+# vars for handling conditionals for RedHat and clones
+# DO NOT EDIT - file is auto-generated
 ---
-__sudo_sudoers_config: /etc/sudoers
-__sudo_packages: sudo
-__sudo_services: []
-__sudo_required_facts:
-  - distribution
-  - distribution_major_version
-  - distribution_version
-  - os_family
-__sudo_required_facts_subsets: "{{ ['!all', '!min'] +
-  __sudo_required_facts }}"
-
-# BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
 __sudo_rh_distros:
   - AlmaLinux
@@ -27,4 +16,3 @@ __sudo_is_rh_distro: "{{ ansible_distribution in __sudo_rh_distros }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone, or Fedora
 __sudo_is_rh_distro_fedora: "{{ ansible_distribution in __sudo_rh_distros_fedora }}"
-# END - DO NOT EDIT THIS BLOCK - rh distros variables
