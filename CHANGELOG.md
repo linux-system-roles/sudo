@@ -1,6 +1,23 @@
 Changelog
 =========
 
+[1.2.0] - 2024-10-30
+--------------------
+
+### New Features
+
+- feat: Add variable that handles semantic check for sudoers (#22)
+
+### Other Changes
+
+- ci: Add workflow for ci_test bad, use remote fmf plan (#20)
+- ci: Fix missing slash in ARTIFACTS_URL (#21)
+- ci: Add python unit tests (#23)
+- ci: Add tags to TF workflow, allow more [citest bad] formats (#24)
+- ci: ansible-test action now requires ansible-core version (#25)
+- ci: add YAML header to github action workflow files (#26)
+- refactor: Use vars/RedHat_N.yml symlink for CentOS, Rocky, Alma wherever possible (#28)
+
 [1.1.0] - 2024-08-01
 --------------------
 
