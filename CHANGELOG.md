@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.2.1] - 2024-11-13
+--------------------
+
+### Other Changes
+
+- refactor: role supports only EL8 and later - metadata should reflect that (#30)
+
 [1.2.0] - 2024-10-30
 --------------------
 
