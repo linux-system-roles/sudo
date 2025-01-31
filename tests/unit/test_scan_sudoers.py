@@ -3,7 +3,7 @@
 # Copyright: (c) 2024, Radovan Sroka <rsroka@redhat.com>
 # SPDX-License-Identifier: GPL-2.0-or-later
 #
-""" Unit tests for the scan_sudoers module """
+"""Unit tests for the scan_sudoers module"""
 
 
 from __future__ import absolute_import, division, print_function
