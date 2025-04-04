@@ -1,9 +1,9 @@
 ---
 name: Run integration tests in Testing Farm
 on:
-  issue_comment:
-    types:
-      - created
+  workflow_dispatch:
+  push:
+    branches: [tf-image-mode]
 permissions:
   contents: read
   # This is required for the ability to create/update the Pull request status
@@ -11,18 +11,6 @@ permissions:
 jobs:
   prepare_vars:
     name: Get info from role and PR to determine if and how to test
-    # The concurrency key is used to prevent multiple workflows from running at the same time
-    concurrency:
-      # group name contains reponame-pr_num to allow simualteneous runs in different PRs
-      group: testing-farm-${{ github.event.repository.name }}-${{ github.event.issue.number }}
-      cancel-in-progress: true
-    # Let's schedule tests only on user request. NOT automatically.
-    # Only repository owner or member can schedule tests
-    if: |
-      github.event.issue.pull_request
-      && contains(github.event.comment.body, '[citest]')
-      && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)
-      || contains('systemroller', github.event.comment.user.login))
     runs-on: ubuntu-latest
     outputs:
       supported_platforms: ${{ steps.supported_platforms.outputs.supported_platforms }}
@@ -76,6 +64,7 @@ jobs:
           for ver in 8 9 10; do
             if yq '.galaxy_info.galaxy_tags[]' "$meta_main" | grep -qi el"$ver"; then
               supported_platforms+=" CentOS-Stream-$ver"
+              supported_platforms+=" RHEL-${ver}.0-image-mode"
             fi
           done
           echo "supported_platforms=$supported_platforms" >> $GITHUB_OUTPUT
@@ -87,20 +76,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: Fedora-40
-            ansible_version: 2.17
-          - platform: Fedora-41
-            ansible_version: 2.17
-          - platform: CentOS-7-latest
-            ansible_version: 2.9
-          - platform: CentOS-Stream-8
-            ansible_version: 2.9
-          # On CentOS-Stream-8, latest supported Ansible is 2.16
-          - platform: CentOS-Stream-8
-            ansible_version: 2.16
-          - platform: CentOS-Stream-9
-            ansible_version: 2.17
           - platform: CentOS-Stream-10
+            ansible_version: 2.17
+          - platform: RHEL-10.0-image-mode
             ansible_version: 2.17
     runs-on: ubuntu-latest
     env:
