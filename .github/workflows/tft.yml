@@ -38,20 +38,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Get head sha of the PR
+      - name: Get head sha of the tested branch
         id: head_sha
-        run: |
-          head_sha=$(gh api "repos/$REPO/pulls/$PR_NO" --jq '.head.sha')
-          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
-        env:
-          REPO: ${{ github.repository }}
-          PR_NO: ${{ github.event.issue.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout PR
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.head_sha.outputs.head_sha }}
+        run: git rev-parse HEAD
 
       - name: Get memory
         id: memory
