@@ -19,4 +19,6 @@ galaxy_info:
     - el9
     - el10
     - fedora
+    - container
+    - containerbuild
 dependencies: []
