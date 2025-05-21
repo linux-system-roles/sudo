@@ -1,6 +1,30 @@
 Changelog
 =========
 
+[1.2.3] - 2025-05-21
+--------------------
+
+### Other Changes
+
+- ci: ansible-plugin-scan is disabled for now (#36)
+- ci: bump ansible-lint to v25; provide collection requirements for ansible-lint (#39)
+- refactor: fix python black formatting (#40)
+- ci: Check spelling with codespell (#41)
+- ci: Add test plan that runs CI tests and customize it for each role (#42)
+- ci: In test plans, prefix all relate variables with SR_ (#43)
+- ci: Fix bug with ARTIFACTS_URL after prefixing with SR_ (#44)
+- ci: Drop explicit "connection:" for provisioning (#45)
+- ci: Run QEMU tox integration tests in GitHub workflow (#46)
+- ci: Add Python 3.12 (#47)
+- ci: several changes related to new qemu test, ansible-lint, python versions, ubuntu versions (#48)
+- ci: use tox-lsr 3.6.0; improve qemu test logging (#50)
+- ci: skip storage scsi, nvme tests in github qemu ci (#51)
+- ci: Add container integration test for rpm and bootc (#52)
+- ci: Update to tox-lsr 3.7.0 (#53)
+- ci: bump sclorg/testing-farm-as-github-action from 3 to 4 (#54)
+- ci: bump tox-lsr to 3.8.0; rename qemu/kvm tests (#55)
+- ci: Add Fedora 42; use tox-lsr 3.9.0; use lsr-report-errors for qemu tests (#56)
+
 [1.2.2] - 2025-01-09
 --------------------
 
