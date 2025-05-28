@@ -8,12 +8,20 @@
       block:
         - name: Test setup
           include_tasks: tasks/setup.yml
+          when: not __bootc_validation | d(false)
 
         - name: Run the role
           include_role:
             name: linux-system-roles.sudo
           vars:
             sudo_check_if_configured: false
+          when: not __bootc_validation | d(false)
+
+        - name: Create QEMU deployment during bootc end-to-end test
+          delegate_to: localhost
+          command: "{{ lsr_scriptdir }}/bootc-buildah-qcow.sh {{ ansible_host }}"
+          changed_when: true
+          when: ansible_connection == "buildah"
 
         - name: Check header for ansible_managed, fingerprint
           include_tasks: tasks/check_present_header.yml
@@ -24,3 +32,4 @@
       always:
         - name: Test cleanup
           include_tasks: tasks/cleanup.yml
+          when: not __bootc_validation | d(false)
