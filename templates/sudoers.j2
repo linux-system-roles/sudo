@@ -5,11 +5,15 @@
 {%   for alias_item in item.aliases[alias_dict] %}
 {{ alias_str }}    {{ alias_item.name }} = {{ alias_item[alias_subdict_name] | join(", ") }}
 {%   endfor %}
+{% else %}
+{{- '' -}}
 {% endif %}
 {%- endmacro -%}
 {%- macro render_override_spec(spec,spec_type, spec_dict, sign) %}
 {% if spec.type == spec_type %}
 Defaults{{ sign }} {{ spec[spec_dict] | join(", ") }} {{ spec.defaults | join(", ") }}
+{% else %}
+{{- '' -}}
 {% endif %}
 {%- endmacro -%}
 {{ ansible_managed | default('Ansible managed') | comment }}
