@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.2.4] - 2025-06-23
+--------------------
+
+### Bug Fixes
+
+- fix: Avoid setting ansible_managed variable (#61)
+- fix: Avoid append() in sudoers file template (#62)
+
+### Other Changes
+
+- tests: Update tests_default.yml to do bootc end-to-end validation (#59)
+- ci: Use ansible 2.19 for fedora 42 testing; support python 3.13 (#60)
+
 [1.2.3] - 2025-05-21
 --------------------
 
