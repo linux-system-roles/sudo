@@ -158,8 +158,14 @@ You can use a defined `host_alias` name as well as host names.
 You can use a defined `runas_alias` name as well as user names.
 
 4. `selinux_role` - Optional selinux role to apply to the specification.
+   **NOTE** - only a single value is supported.  However, due to historical
+   reasons, the value can be a list - if a list is given, only the first value
+   is used.  Please use a `string` value.
 
 5. `selinux_type` - Optional selinux type to apply to the specification.
+   **NOTE** - only a single value is supported.  However, due to historical
+   reasons, the value can be a list - if a list is given, only the first value
+   is used.  Please use a `string` value.
 
 6. `solaris_privs` - Optional Solaris privset to apply to the specification.
 
@@ -192,6 +198,8 @@ sudo_sudoers_files:
           - ALL
         commands:
           - ALL
+        selinux_role: sysadm_r
+        selinux_type: sysadm_t
 ```
 
 #### default_overrides

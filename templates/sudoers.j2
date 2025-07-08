@@ -64,17 +64,17 @@ Defaults    {{ default }}
 {%- if spec.operators is defined and spec.operators | length > 0 -%}
 ({{ spec.operators | join(", ") }})
 {%- endif -%}
-{%- if spec.selinux_type is defined and spec.selinux_type | length > 0 -%}
- TYPE={{ spec.selinux_type | join(", ") }}
+{%- if spec.selinux_type is defined and spec.selinux_type | length > 0 %}
+ TYPE={{ spec.selinux_type if spec.selinux_type is string else spec.selinux_type[0] }}
 {%- endif -%}
-{%- if spec.selinux_role is defined and spec.selinux_role | length > 0 -%}
- ROLE={{ spec.selinux_role | join(", ") }}
+{%- if spec.selinux_role is defined and spec.selinux_role | length > 0 %}
+ ROLE={{ spec.selinux_role if spec.selinux_role is string else spec.selinux_role[0] }}
 {%- endif -%}
-{%- if spec.solaris_privs is defined and spec.solaris_privs | length > 0 -%}
- PRIVS={{ spec.solaris_privs | join(", ") }}
+{%- if spec.solaris_privs is defined and spec.solaris_privs | length > 0 %}
+ PRIVS={{ spec.solaris_privs | join(",") }}
 {%- endif -%}
-{%- if spec.solaris_limitprivs is defined and spec.solaris_limitprivs | length > 0 -%}
- LIMITPRIVS={{ spec.solaris_limitprivs | join(", ") }}
+{%- if spec.solaris_limitprivs is defined and spec.solaris_limitprivs | length > 0 %}
+ LIMITPRIVS={{ spec.solaris_limitprivs | join(",") }}
 {%- endif -%}
 {%- if spec.tags is defined and spec.tags | length > 0 -%}
 {{ spec.tags | join(":") }}:
