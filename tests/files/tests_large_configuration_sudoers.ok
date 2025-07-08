@@ -33,7 +33,7 @@ User_Alias    PINGERS = username
 
 # User specifications
 root ALL=(ALL) ALL
-%wheel ALL=(ALL) ALL
+%wheel ALL=(ALL) TYPE=sysadm_t ROLE=sysadm_r /bin/pwd, /usr/bin/cd
 
 # Default override specifications
 Defaults: PINGERS !requiretty

@@ -71,8 +71,11 @@
                       - ALL
                     operators:
                       - ALL
+                    selinux_type: sysadm_t
+                    selinux_role: sysadm_r
                     commands:
-                      - ALL
+                      - /bin/pwd
+                      - /usr/bin/cd
                 default_overrides:
                   - type: user
                     defaults:
