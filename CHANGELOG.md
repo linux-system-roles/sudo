@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.2.5] - 2025-07-09
+--------------------
+
+### Bug Fixes
+
+- fix: ensure single space before TYPE, ROLE, and correctly format those values (#65)
+
 [1.2.4] - 2025-06-23
 --------------------
 
