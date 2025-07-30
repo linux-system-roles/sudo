@@ -187,17 +187,22 @@ def get_config_lines(path, params):
     comment_re = re.compile(r"^#+")
     include_re = re.compile(r"^#include")
     defaults_re = re.compile(r"^(Defaults)+\s+(.*$)")
+    # NOTE: The spec https://www.sudo.ws/docs/man/1.9.17/sudoers.man/ says
+    # NAME ::= A-Z*
+    # A NAME is a string of uppercase letters, numbers, and underscore characters ('_').
+    # A NAME must start with an uppercase letter.
+    # I'm assuming these are ASCII - so the pattern used for NAME is ([A-Z][A-Z0-9_]*)
     cmnd_alias_re = re.compile(
-        r"(^Cmnd_Alias)+\s+(\S+)+\s*\={1}\s*((\S+,{1}\s*)+\S+|\S+)\s*(\:)*(.*)*$"
+        r"(^Cmnd_Alias)+\s+([A-Z][A-Z0-9_]*)\s*\=\s*((\S+,\s*)+\S+|\S+)\s*(\:)*(.*)*$"
     )
     host_alias_re = re.compile(
-        r"(^Host_Alias)+\s+(\S+)+\s*\={1}\s*((\S+,{1}\s*)+\S+|\S+)\s*(\:)*(.*)*$"
+        r"(^Host_Alias)+\s+([A-Z][A-Z0-9_]*)\s*\=\s*((\S+,\s*)+\S+|\S+)\s*(\:)*(.*)*$"
     )
     runas_alias_re = re.compile(
-        r"(^Runas_Alias)+\s+(\S+)+\s*\={1}\s*((\S+,{1}\s*)+\S+|\S+)\s*(\:)*(.*)*$"
+        r"(^Runas_Alias)+\s+([A-Z][A-Z0-9_]*)\s*\=\s*((\S+,\s*)+\S+|\S+)\s*(\:)*(.*)*$"
     )
     user_alias_re = re.compile(
-        r"(^User_Alias)+\s+(\S+)+\s*\={1}\s*((\S+,{1}\s*)+\S+|\S+)\s*(\:)*(.*)*$"
+        r"(^User_Alias)+\s+([A-Z][A-Z0-9_]*)\s*\=\s*((\S+,\s*)+\S+|\S+)\s*(\:)*(.*)*$"
     )
 
     # Defaults Parsing vars

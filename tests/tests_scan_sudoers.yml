@@ -1,0 +1,101 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Ensure that the role can parse existing sudoers
+  hosts: all
+  gather_facts: false  # test that role works in this case
+  vars:
+    alias_values:
+      Cmnd_Alias:
+        - name: MY_CMND_NO_SPACES
+          commands:
+            - /usr/local/bin/my_cmd_alias.sh
+        - name: MY_CMND_SPACES
+          commands:
+            - /usr/local/bin/my_cmd_alias.sh
+      Host_Alias:
+        - name: MY_HOST_NO_SPACES
+          hosts:
+            - myhostalias.example.com
+        - name: MY_HOST_SPACES
+          hosts:
+            - myhostalias.example.com
+      User_Alias:
+        - name: MY_USER_NO_SPACES
+          users:
+            - myuser
+        - name: MY_USER_SPACES
+          users:
+            - myuser
+      Runas_Alias:
+        - name: MY_RUNAS_NO_SPACES
+          users:
+            - myrunasuser
+        - name: MY_RUNAS_SPACES
+          users:
+            - myrunasuser
+    alias_keys: "{{ alias_values.keys() | list }}"
+    alias_names: "{{ alias_keys | zip(alias_keys) | flatten | list }}"
+    alias_vals: "{{ alias_values.values() | flatten | list }}"
+    names_vals: "{{ alias_names | zip(alias_vals) | list }}"
+  tasks:
+    - name: Run tests
+      block:
+        - name: Test setup
+          include_tasks: tasks/setup.yml
+
+        - name: Try with no spaces in alias definitions
+          copy:
+            dest: /etc/sudoers
+            content: |
+              {% for alias in names_vals %}
+              {%   set itemvals = alias.1.values() | list %}
+              {%   set space = ("NO_SPACES" in itemvals.0) | ternary("", " ") %}
+              {{ alias.0 }} {{ itemvals.0 }}{{ space }}={{ space }}{{ itemvals.1 | join("") }}
+              {% endfor %}
+            mode: preserve
+
+        - name: Run the role
+          include_role:
+            name: linux-system-roles.sudo
+          vars:
+            sudo_rewrite_default_sudoers_file: true
+            sudo_remove_unauthorized_included_files: true
+            sudo_sudoers_files:
+              - path: /etc/sudoers
+                aliases: "{{ aliases }}"
+            aliases: "{{ dict(keys | zip(vals)) }}"
+            keys: "{{ alias_values | dict2items | map(attribute='key') | map('lower') | list }}"
+            vals: "{{ alias_values | dict2items | map(attribute='value') | list }}"
+
+        - name: Get sudoers
+          slurp:
+            path: /etc/sudoers
+          register: __check_sudoers
+
+        - name: Check that lines are properly formatted
+          debug:
+            msg: expected {{ expected }} in actual {{ actual }}
+          loop: "{{ names_vals }}"
+          vars:
+            expected: "{{ item.0 }} {{ vals.0 }} = {{ vals.1.0 }}"
+            vals: "{{ item.1.values() | list }}"
+            actual: "{{ __check_sudoers.content | b64decode }}"
+
+        - name: Check that lines are properly formatted
+          assert:
+            that: expected in actual
+          loop: "{{ names_vals }}"
+          vars:
+            expected: "{{ item.0 }}    {{ vals.0 }} = {{ vals.1.0 }}"
+            vals: "{{ item.1.values() | list }}"
+            actual: "{{ __check_sudoers.content | b64decode }}"
+
+        - name: Check header for ansible_managed, fingerprint
+          include_tasks: tasks/check_present_header.yml
+          vars:
+            __file: /etc/sudoers
+            __fingerprint: system_role:sudo
+
+      always:
+        - name: Test cleanup
+          include_tasks: tasks/cleanup.yml
