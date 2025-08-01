@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.2.6] - 2025-08-01
+--------------------
+
+### Bug Fixes
+
+- fix: Use the correct regular expression to parse Cmnd_Alias and other aliases (#68)
+
 [1.2.5] - 2025-07-09
 --------------------
 
