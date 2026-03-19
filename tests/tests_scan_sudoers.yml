@@ -2,7 +2,6 @@
 ---
 - name: Ensure that the role can parse existing sudoers
   hosts: all
-  gather_facts: false  # test that role works in this case
   vars:
     alias_values:
       Cmnd_Alias:
@@ -55,8 +54,7 @@
             mode: preserve
 
         - name: Run the role
-          include_role:
-            name: linux-system-roles.sudo
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             sudo_rewrite_default_sudoers_file: true
             sudo_remove_unauthorized_included_files: true

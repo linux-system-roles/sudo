@@ -2,7 +2,6 @@
 ---
 - name: Ensure that the role runs with default parameters
   hosts: all
-  gather_facts: false  # test that role works in this case
   tasks:
     - name: Run tests
       block:
@@ -11,8 +10,7 @@
           when: not __bootc_validation | d(false)
 
         - name: Run the role
-          include_role:
-            name: linux-system-roles.sudo
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             sudo_check_if_configured: false
           when: not __bootc_validation | d(false)

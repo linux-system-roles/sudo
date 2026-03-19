@@ -8,8 +8,7 @@
           include_tasks: tasks/setup.yml
 
         - name: Run the role
-          include_role:
-            name: linux-system-roles.sudo
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             sudo_rewrite_default_sudoers_file: true
             sudo_remove_unauthorized_included_files: true
