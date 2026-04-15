@@ -334,7 +334,8 @@ Defaults env_keep += \"COLORS DISPLAY\"
         "scan_sudoers.get_includes",
         return_value={"include_files": ["/etc/sudoers.d/file1"]},
     )
-    def test_get_config_lines01(self, mock_open, mock_get_includes):
+    @patch("scan_sudoers.isfile", return_value=True)
+    def test_get_config_lines01(self, mock_isfile, mock_open, mock_get_includes):
         # Arrange
 
         params = {"output_raw_configs": True, "output_parsed_configs": True}
@@ -395,7 +396,8 @@ monitor ALL=(ALL:ALL) SYSTEM_CMDS
         "scan_sudoers.get_includes",
         return_value={"include_files": ["/etc/sudoers.d/file1"]},
     )
-    def test_get_config_lines02(self, mock_open, mock_get_includes):
+    @patch("scan_sudoers.isfile", return_value=True)
+    def test_get_config_lines02(self, mock_isfile, mock_open, mock_get_includes):
         # Arrange
         params = {"output_raw_configs": True, "output_parsed_configs": True}
         expected_output = {
