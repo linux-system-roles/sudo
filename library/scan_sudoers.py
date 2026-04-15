@@ -168,6 +168,8 @@ def get_includes(path):
 
 def get_config_lines(path, params):
     # Read sudoers file
+    if not os.path.isfile(path):
+        return {}
     fp = open(path, "r")
     all_lines = fp.read()
     fp.close()
