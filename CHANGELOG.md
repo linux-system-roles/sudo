@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[1.3.1] - 2026-05-07
+--------------------
+
+### Other Changes
+
+- refactor: fix formatting in requirements file [citest_skip] (#115)
+- ci: bump actions/github-script from 8 to 9 (#116)
+
 [1.3.0] - 2026-04-28
 --------------------
 
