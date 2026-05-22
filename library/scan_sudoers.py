@@ -222,6 +222,13 @@ def get_config_lines(path, params):
         sudoer_file["include_directories"] = includes["include_directories"]
     except KeyError:  # ignore keyerror
         pass
+    # process continuation lines - from the man page for sudoers:
+    #       Long lines can be continued with a backslash (\) as the last
+    #       character on the line.
+    # replace backslash followed by a newline with an empty string, but only if the backslash
+    # is not escaped (preceded by a backslash)
+    # I guess someone might have a legitimate use case for ending a line with a backslash . . .
+    all_lines = re.sub(r"(?<!\\)\\\n", "", all_lines)
     # Work on each line of sudoers file
     for sline in all_lines.strip().split("\n"):
         line = sline.replace("\n", "").replace(

@@ -36,6 +36,20 @@
     alias_names: "{{ alias_keys | zip(alias_keys) | flatten | list }}"
     alias_vals: "{{ alias_values.values() | flatten | list }}"
     names_vals: "{{ alias_names | zip(alias_vals) | list }}"
+    # This is the format that the role expects the aliases to be in
+    # mostly have to lowercase the keys to match the format of the role
+    aliases_in_role_input_format: "{{ dict(keys | zip(vals)) }}"
+    keys: "{{ alias_values | dict2items | map(attribute='key') | map('lower') | list }}"
+    vals: "{{ alias_values | dict2items | map(attribute='value') | list }}"
+    # This is what we expect to be the output of scan_sudoers after parsing
+    # the file with the continuation lines
+    __expected_scan_sudoers_parsed_continations:
+      all_scanned_files:
+        - /etc/sudoers
+      sudoers_files:
+        - aliases: "{{ aliases_in_role_input_format }}"
+          path: /etc/sudoers
+          user_specifications: []
   tasks:
     - name: Run tests
       block:
@@ -49,7 +63,9 @@
               {% for alias in names_vals %}
               {%   set itemvals = alias.1.values() | list %}
               {%   set space = ("NO_SPACES" in itemvals.0) | ternary("", " ") %}
-              {{ alias.0 }} {{ itemvals.0 }}{{ space }}={{ space }}{{ itemvals.1 | join("") }}
+              {{ alias.0 }} \
+              {{ itemvals.0 }}{{ space }}={{ space }}\
+              {{ itemvals.1 | join("") }}
               {% endfor %}
             mode: preserve
 
@@ -60,10 +76,11 @@
             sudo_remove_unauthorized_included_files: true
             sudo_sudoers_files:
               - path: /etc/sudoers
-                aliases: "{{ aliases }}"
-            aliases: "{{ dict(keys | zip(vals)) }}"
-            keys: "{{ alias_values | dict2items | map(attribute='key') | map('lower') | list }}"
-            vals: "{{ alias_values | dict2items | map(attribute='value') | list }}"
+                aliases: "{{ aliases_in_role_input_format }}"
+
+        - name: Assert that scan_sudoers parsed the sudoers file correctly with continuation lines
+          assert:
+            that: __expected_scan_sudoers_parsed_continations == ansible_facts.sudoers
 
         - name: Get sudoers
           slurp:
