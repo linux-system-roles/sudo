@@ -76,8 +76,8 @@ Defaults    {{ default }}
 {%- if spec.solaris_limitprivs is defined and spec.solaris_limitprivs | length > 0 %}
  LIMITPRIVS={{ spec.solaris_limitprivs | join(",") }}
 {%- endif -%}
-{%- if spec.tags is defined and spec.tags | length > 0 -%}
-{{ spec.tags | join(":") }}:
+{%- if spec.tags is defined and spec.tags | length > 0 %}
+ {{ spec.tags | join(":") }}:
 {%- endif -%}
 {{ " " + spec.commands | join(", ") }}
 {%     endif %}

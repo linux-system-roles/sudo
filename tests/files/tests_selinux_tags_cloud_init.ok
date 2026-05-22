@@ -1,0 +1,7 @@
+#
+# Ansible managed
+#
+# system_role:sudo
+
+# User specifications
+maintuser ALL=(ALL) TYPE=unconfined_t ROLE=unconfined_r NOPASSWD: ALL
