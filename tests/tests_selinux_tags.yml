@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Test SELinux TYPE/ROLE with tags in user specifications
+  hosts: all
+  tasks:
+    - name: Run tests
+      block:
+        - name: Test setup
+          include_tasks: tasks/setup.yml
+
+        - name: Run the role
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            sudo_rewrite_default_sudoers_file: true
+            sudo_remove_unauthorized_included_files: true
+            sudo_sudoers_files:
+              - path: /etc/sudoers
+                defaults:
+                  - "!visiblepw"
+                  - always_set_home
+                  - match_group_by_gid
+                  - always_query_group_plugin
+                  - env_reset
+                  - secure_path:
+                      - /sbin
+                      - /bin
+                      - /usr/sbin
+                      - /usr/bin
+                  - env_keep:
+                      - COLORS
+                      - DISPLAY
+                      - HOSTNAME
+                      - HISTSIZE
+                      - KDEDIR
+                      - LS_COLORS
+                      - MAIL
+                      - PS1
+                      - PS2
+                      - QTDIR
+                      - USERNAME
+                      - LANG
+                      - LC_ADDRESS
+                      - LC_CTYPE
+                      - LC_COLLATE
+                      - LC_IDENTIFICATION
+                      - LC_MEASUREMENT
+                      - LC_MESSAGES
+                      - LC_MONETARY
+                      - LC_NAME
+                      - LC_NUMERIC
+                      - LC_PAPER
+                      - LC_TELEPHONE
+                      - LC_TIME
+                      - LC_ALL
+                      - LANGUAGE
+                      - LINGUAS
+                      - _XKB_CHARSET
+                      - XAUTHORITY
+                user_specifications:
+                  - users:
+                      - root
+                    hosts:
+                      - ALL
+                    operators:
+                      - ALL
+                    commands:
+                      - ALL
+                include_directories:
+                  - /etc/sudoers.d
+              - path: /etc/sudoers.d/90-cloud-init-users
+                user_specifications:
+                  - users:
+                      - maintuser
+                    hosts:
+                      - ALL
+                    operators:
+                      - ALL
+                    selinux_type:
+                      - unconfined_t
+                    selinux_role:
+                      - unconfined_r
+                    tags:
+                      - NOPASSWD
+                    commands:
+                      - ALL
+
+        - name: Check cloud-init users sudoers include
+          include_tasks: tasks/assert_files_identical.yml
+          vars:
+            __sudo_ok_path: files/tests_selinux_tags_cloud_init.ok
+            __sudo_test_path: /etc/sudoers.d/90-cloud-init-users
+
+      always:
+        - name: Test cleanup
+          include_tasks: tasks/cleanup.yml
