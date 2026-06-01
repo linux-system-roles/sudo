@@ -1,6 +1,20 @@
 Changelog
 =========
 
+[1.3.2] - 2026-06-01
+--------------------
+
+### Bug Fixes
+
+- fix: support continuation lines in scan_sudoers (#122)
+- fix: use correct spacing before tags (#123)
+
+### Other Changes
+
+- refactor: use ansible.posix 2.1.X for EL7 compatibility [citest_skip] (#118)
+- ci: Add config file for CodeRabbit with custom rules (#119)
+- ci: Skip reviews for PRs with [citest_skip] in the title (#120)
+
 [1.3.1] - 2026-05-07
 --------------------
 
