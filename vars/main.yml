@@ -11,6 +11,8 @@ __sudo_required_facts:
 __sudo_required_facts_subsets: "{{ ['!all', '!min'] +
   __sudo_required_facts }}"
 
+__sudo_write_log_file: false
+
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
 __sudo_rh_distros:
