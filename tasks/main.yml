@@ -2,6 +2,9 @@
 - name: Set version specific variables
   include_tasks: set_vars.yml
 
+- name: Validate role parameters
+  ansible.builtin.include_tasks: assert_role_vars.yml
+
 - name: Scan sudoers
   scan_sudoers:
     output_parsed_configs: true
