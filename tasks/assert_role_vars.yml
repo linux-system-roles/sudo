@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Assert sudo_transactional_update_reboot_ok is null or a boolean
+  ansible.builtin.assert:
+    that:
+      - >-
+        (sudo_transactional_update_reboot_ok is none)
+        or (sudo_transactional_update_reboot_ok is sameas true)
+        or (sudo_transactional_update_reboot_ok is sameas false)
+    fail_msg: >-
+      sudo_transactional_update_reboot_ok must be null or a boolean,
+      got {{ sudo_transactional_update_reboot_ok | type_debug }}
+
+- name: Assert defaults items are strings or mappings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item is string
+        or item is mapping
+    fail_msg: >-
+      sudo_sudoers_files defaults items must be strings or
+      mappings, got {{ item | type_debug }}
+  loop: "{{ sudo_sudoers_files | selectattr('defaults', 'defined')
+    | map(attribute='defaults') | flatten }}"
+  loop_control:
+    label: "{{ item if item is string else
+      (item.keys() | list | first if item is mapping
+      else item | string) }}"
+
+- name: Assert selinux_role is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.selinux_role is string
+        or (item.selinux_role is sequence
+            and item.selinux_role is not mapping
+            and item.selinux_role | reject('string') | list
+            | length == 0)
+    fail_msg: >-
+      selinux_role in user_specifications must be a string or
+      list of strings, got {{ item.selinux_role | type_debug }}
+  loop: "{{ sudo_sudoers_files
+    | selectattr('user_specifications', 'defined')
+    | map(attribute='user_specifications') | flatten }}"
+  loop_control:
+    label: "{{ item.users | d(['unnamed']) | first }}"
+  when: item.selinux_role is defined
+
+- name: Assert selinux_type is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.selinux_type is string
+        or (item.selinux_type is sequence
+            and item.selinux_type is not mapping
+            and item.selinux_type | reject('string') | list
+            | length == 0)
+    fail_msg: >-
+      selinux_type in user_specifications must be a string or
+      list of strings, got {{ item.selinux_type | type_debug }}
+  loop: "{{ sudo_sudoers_files
+    | selectattr('user_specifications', 'defined')
+    | map(attribute='user_specifications') | flatten }}"
+  loop_control:
+    label: "{{ item.users | d(['unnamed']) | first }}"
+  when: item.selinux_type is defined

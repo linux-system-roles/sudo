@@ -1,0 +1,278 @@
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: The sudo role.
+    description: >
+      The sudo role configures sudo by managing sudoers files.
+      It can manage the main `/etc/sudoers` file as well as
+      additional files in included directories such as
+      `/etc/sudoers.d`. The role supports configuring defaults,
+      user specifications, aliases, default overrides, and
+      include directives.
+    options:
+      sudo_rewrite_default_sudoers_file:
+        type: bool
+        default: true
+        description: >
+          Whether to overwrite the distribution-supplied
+          `/etc/sudoers` file with the role configuration.
+          Set to `false` to deploy only to included directories
+          without modifying `/etc/sudoers`.
+      sudo_remove_unauthorized_included_files:
+        type: bool
+        default: false
+        description: >
+          Whether to remove existing sudoers files in the
+          configured include directories that are not defined
+          in `sudo_sudoers_files`. This enforces a desired
+          state but is potentially dangerous.
+      sudo_check_if_configured:
+        type: bool
+        default: true
+        description: >
+          Whether to perform a semantic check of the already
+          configured sudoers and skip the role if the
+          configuration matches.
+      sudo_visudo_path:
+        type: path
+        default: /usr/sbin/visudo
+        description: >
+          Fully-qualified path to the `visudo` binary used to
+          validate sudoers configuration changes.
+      sudo_transactional_update_reboot_ok:
+        type: raw
+        default: null
+        description: >
+          Whether to allow reboots required by transactional
+          updates. Set to `true` to allow automatic reboots,
+          `false` to skip the reboot and allow custom handling,
+          or `null` to fail when a reboot is needed.
+      sudo_sudoers_files:
+        type: list
+        elements: dict
+        description: >
+          List of sudoers file configurations to deploy. Each
+          item defines the content and target path of a sudoers
+          file.
+        options:
+          path:
+            type: str
+            required: true
+            description: >
+              Filesystem path where the sudoers configuration
+              file is deployed, for example `/etc/sudoers` or
+              `/etc/sudoers.d/custom`.
+          defaults:
+            type: list
+            elements: raw
+            description: >
+              List of sudoers `Defaults` entries. Each item is
+              either a string such as `"!visiblepw"` or
+              `always_set_home`, or a mapping for options that
+              take lists of values such as
+              `secure_path: [/sbin, /bin]` or
+              `env_keep: [LANG, LC_ALL]`.
+          user_specifications:
+            type: list
+            elements: dict
+            description: >
+              List of user specification entries for the
+              sudoers file. Each entry maps users, hosts, and
+              commands with optional operators, SELinux
+              contexts, Solaris privileges, and tags.
+            options:
+              users:
+                type: list
+                elements: str
+                description: >
+                  List of users or user aliases the
+                  specification applies to.
+              hosts:
+                type: list
+                elements: str
+                description: >
+                  List of hosts or host aliases the
+                  specification applies to.
+              operators:
+                type: list
+                elements: str
+                description: >
+                  List of runas operators or runas aliases
+                  for the specification.
+              commands:
+                type: list
+                elements: str
+                description: >
+                  List of commands or command aliases the
+                  specification permits.
+              selinux_role:
+                type: raw
+                description: >
+                  SELinux role for the user specification.
+                  Accepts a string value. For historical
+                  reasons a list is also accepted, but only
+                  the first element is used.
+              selinux_type:
+                type: raw
+                description: >
+                  SELinux type for the user specification.
+                  Accepts a string value. For historical
+                  reasons a list is also accepted, but only
+                  the first element is used.
+              solaris_privs:
+                type: list
+                elements: str
+                description: >
+                  List of Solaris privileges to assign via
+                  the `PRIVS` tag.
+              solaris_limitprivs:
+                type: list
+                elements: str
+                description: >
+                  List of Solaris limit privileges to assign
+                  via the `LIMITPRIVS` tag.
+              tags:
+                type: list
+                elements: str
+                description: >
+                  List of tags to apply to the user
+                  specification, such as `NOPASSWD` or
+                  `SETENV`.
+          default_overrides:
+            type: list
+            elements: dict
+            description: >
+              List of default override specifications. Each
+              entry overrides `Defaults` values for a specific
+              user, runas operator, host, or command scope.
+            options:
+              defaults:
+                type: list
+                elements: str
+                description: >
+                  List of defaults to override.
+              type:
+                type: str
+                choices:
+                  - command
+                  - host
+                  - runas
+                  - user
+                description: >
+                  The scope of the default override. Determines
+                  which sudoers operator is used: `user` maps
+                  to `:`, `runas` to `>`, `host` to `@`, and
+                  `command` to `!`.
+              commands:
+                type: list
+                elements: str
+                description: >
+                  List of commands for the override. Used when
+                  `type` is `command`.
+              hosts:
+                type: list
+                elements: str
+                description: >
+                  List of hosts for the override. Used when
+                  `type` is `host`.
+              operators:
+                type: list
+                elements: str
+                description: >
+                  List of runas operators for the override.
+                  Used when `type` is `runas`.
+              users:
+                type: list
+                elements: str
+                description: >
+                  List of users for the override. Used when
+                  `type` is `user`.
+          include_files:
+            type: list
+            elements: path
+            description: >
+              List of fully-qualified paths to include via the
+              `#include` directive in the sudoers file.
+          include_directories:
+            type: list
+            elements: path
+            description: >
+              List of fully-qualified paths to directories to
+              include via the `#includedir` directive in the
+              sudoers file.
+          aliases:
+            type: dict
+            description: >
+              Dictionary of alias definitions for the sudoers
+              file. Supports `user_alias`, `runas_alias`,
+              `host_alias`, and `cmnd_alias` keys.
+            options:
+              user_alias:
+                type: list
+                elements: dict
+                description: >
+                  List of `User_Alias` definitions.
+                options:
+                  name:
+                    type: str
+                    required: true
+                    description: >
+                      The alias name.
+                  users:
+                    type: list
+                    elements: str
+                    required: true
+                    description: >
+                      List of users in the alias.
+              runas_alias:
+                type: list
+                elements: dict
+                description: >
+                  List of `Runas_Alias` definitions.
+                options:
+                  name:
+                    type: str
+                    required: true
+                    description: >
+                      The alias name.
+                  users:
+                    type: list
+                    elements: str
+                    required: true
+                    description: >
+                      List of users in the alias.
+              host_alias:
+                type: list
+                elements: dict
+                description: >
+                  List of `Host_Alias` definitions.
+                options:
+                  name:
+                    type: str
+                    required: true
+                    description: >
+                      The alias name.
+                  hosts:
+                    type: list
+                    elements: str
+                    required: true
+                    description: >
+                      List of hosts in the alias.
+              cmnd_alias:
+                type: list
+                elements: dict
+                description: >
+                  List of `Cmnd_Alias` definitions.
+                options:
+                  name:
+                    type: str
+                    required: true
+                    description: >
+                      The alias name.
+                  commands:
+                    type: list
+                    elements: str
+                    required: true
+                    description: >
+                      List of commands in the alias.
