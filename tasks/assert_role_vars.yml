@@ -21,7 +21,7 @@
       sudo_sudoers_files defaults items must be strings or
       mappings, got {{ item | type_debug }}
   loop: "{{ sudo_sudoers_files | selectattr('defaults', 'defined')
-    | map(attribute='defaults') | flatten }}"
+    | map(attribute='defaults') | flatten | list }}"
   loop_control:
     label: "{{ item if item is string else
       (item.keys() | list | first if item is mapping
@@ -41,7 +41,7 @@
       list of strings, got {{ item.selinux_role | type_debug }}
   loop: "{{ sudo_sudoers_files
     | selectattr('user_specifications', 'defined')
-    | map(attribute='user_specifications') | flatten }}"
+    | map(attribute='user_specifications') | flatten | list }}"
   loop_control:
     label: "{{ item.users | d(['unnamed']) | first }}"
   when: item.selinux_role is defined
@@ -60,7 +60,7 @@
       list of strings, got {{ item.selinux_type | type_debug }}
   loop: "{{ sudo_sudoers_files
     | selectattr('user_specifications', 'defined')
-    | map(attribute='user_specifications') | flatten }}"
+    | map(attribute='user_specifications') | flatten | list }}"
   loop_control:
     label: "{{ item.users | d(['unnamed']) | first }}"
   when: item.selinux_type is defined
