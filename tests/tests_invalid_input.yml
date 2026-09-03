@@ -1,0 +1,347 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Verify invalid parameters are rejected
+  hosts: all
+  tasks:
+    - name: Back up sudoers configuration
+      ansible.builtin.include_tasks: tasks/setup.yml
+
+    - name: Run invalid input tests
+      block:
+        # ====================================================
+        # Section 1: Verify role works with valid defaults
+        # ====================================================
+        - name: Run role with valid defaults
+          ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+
+        # ====================================================
+        # Section 2: argument_specs validation (Ansible 2.10+)
+        # ====================================================
+        - name: Run argument specs validation tests
+          when: ansible_version.full is version('2.10', '>=')
+          block:
+            # --- Test: non-bool sudo_rewrite_default_sudoers_file ---
+            - name: Argument specs reject non-bool
+                sudo_rewrite_default_sudoers_file
+              block:
+                - name: Run role with string
+                    sudo_rewrite_default_sudoers_file
+                  ansible.builtin.include_tasks:
+                    tasks/run_role_with_clear_facts.yml
+                  vars:
+                    sudo_rewrite_default_sudoers_file: not_a_bool
+              rescue:
+                - name: Mark invalid rewrite type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_rewrite_type_failed: true
+                  when: >-
+                    'sudo_rewrite_default_sudoers_file' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid sudo_rewrite_default_sudoers_file type
+                was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_rewrite_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject
+                  sudo_rewrite_default_sudoers_file when not a boolean
+
+            # --- Test: non-list sudo_sudoers_files ---
+            - name: Argument specs reject non-list sudo_sudoers_files
+              block:
+                - name: Run role with string sudo_sudoers_files
+                  ansible.builtin.include_tasks:
+                    tasks/run_role_with_clear_facts.yml
+                  vars:
+                    sudo_sudoers_files: not_a_list
+              rescue:
+                - name: Mark invalid sudoers_files type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_sudoers_files_type_failed: true
+                  when: >-
+                    'sudo_sudoers_files' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid sudo_sudoers_files type was rejected
+              ansible.builtin.assert:
+                that:
+                  - >-
+                    __invalid_input_sudoers_files_type_failed
+                    | default(false)
+                fail_msg: >-
+                  argument_specs should reject sudo_sudoers_files when
+                  not a list
+
+            # --- Test: missing required path in sudo_sudoers_files ---
+            - name: Argument specs reject missing path in
+                sudo_sudoers_files
+              block:
+                - name: Run role with sudo_sudoers_files missing path
+                  ansible.builtin.include_tasks:
+                    tasks/run_role_with_clear_facts.yml
+                  vars:
+                    sudo_sudoers_files:
+                      - defaults:
+                          - env_reset
+              rescue:
+                - name: Mark missing path rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_path_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing path in sudo_sudoers_files was
+                rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_path_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject sudo_sudoers_files
+                  entries without the required path field
+
+            # --- Test: invalid choice for default_overrides type ---
+            - name: Argument specs reject invalid default_overrides
+                type choice
+              block:
+                - name: Run role with invalid default_overrides type
+                  ansible.builtin.include_tasks:
+                    tasks/run_role_with_clear_facts.yml
+                  vars:
+                    sudo_sudoers_files:
+                      - path: /etc/sudoers
+                        default_overrides:
+                          - type: invalid_type
+                            defaults:
+                              - env_reset
+                            users:
+                              - root
+              rescue:
+                - name: Mark invalid override type choice rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_override_type_choice_failed: true
+                  when: >-
+                    'invalid_type' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid default_overrides type choice was
+                rejected
+              ansible.builtin.assert:
+                that:
+                  - >-
+                    __invalid_input_override_type_choice_failed
+                    | default(false)
+                fail_msg: >-
+                  argument_specs should reject default_overrides type
+                  value 'invalid_type'
+
+            # --- Test: missing required name in user_alias ---
+            - name: Argument specs reject missing name in user_alias
+              block:
+                - name: Run role with user_alias missing name
+                  ansible.builtin.include_tasks:
+                    tasks/run_role_with_clear_facts.yml
+                  vars:
+                    sudo_sudoers_files:
+                      - path: /etc/sudoers
+                        aliases:
+                          user_alias:
+                            - users:
+                                - testuser
+              rescue:
+                - name: Mark missing alias name rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_alias_name_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing name in user_alias was rejected
+              ansible.builtin.assert:
+                that:
+                  - >-
+                    __invalid_input_missing_alias_name_failed
+                    | default(false)
+                fail_msg: >-
+                  argument_specs should reject user_alias entries
+                  without the required name field
+
+        # ====================================================
+        # Section 3: assert_role_vars validation (all versions)
+        # ====================================================
+
+        # --- Test: sudo_transactional_update_reboot_ok as string ---
+        - name: Assert rejects transactional_update_reboot_ok as string
+          block:
+            - name: Run role with transactional_update_reboot_ok
+                as string
+              ansible.builtin.include_tasks:
+                tasks/run_role_with_clear_facts.yml
+              vars:
+                sudo_transactional_update_reboot_ok: not_a_bool
+          rescue:
+            - name: Mark string transactional_update_reboot_ok rejected
+              ansible.builtin.set_fact:
+                __invalid_input_reboot_ok_string_failed: true
+              when: >-
+                'sudo_transactional_update_reboot_ok' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert transactional_update_reboot_ok as string was
+            rejected
+          ansible.builtin.assert:
+            that:
+              - >-
+                __invalid_input_reboot_ok_string_failed
+                | default(false)
+            fail_msg: >-
+              assert_role_vars should reject
+              sudo_transactional_update_reboot_ok when given a string
+
+        # --- Test: sudo_transactional_update_reboot_ok as integer ---
+        - name: Assert rejects transactional_update_reboot_ok
+            as integer
+          block:
+            - name: Run role with transactional_update_reboot_ok
+                as integer
+              ansible.builtin.include_tasks:
+                tasks/run_role_with_clear_facts.yml
+              vars:
+                sudo_transactional_update_reboot_ok: 42
+          rescue:
+            - name: Mark integer transactional_update_reboot_ok
+                rejected
+              ansible.builtin.set_fact:
+                __invalid_input_reboot_ok_int_failed: true
+              when: >-
+                'sudo_transactional_update_reboot_ok' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert transactional_update_reboot_ok as integer was
+            rejected
+          ansible.builtin.assert:
+            that:
+              - >-
+                __invalid_input_reboot_ok_int_failed
+                | default(false)
+            fail_msg: >-
+              assert_role_vars should reject
+              sudo_transactional_update_reboot_ok when given
+              an integer
+
+        # --- Test: defaults item as integer ---
+        - name: Assert rejects defaults item as integer
+          block:
+            - name: Run role with defaults item as integer
+              ansible.builtin.include_tasks:
+                tasks/run_role_with_clear_facts.yml
+              vars:
+                sudo_sudoers_files:
+                  - path: /etc/sudoers
+                    defaults:
+                      - 12345
+          rescue:
+            - name: Mark integer defaults item rejected
+              ansible.builtin.set_fact:
+                __invalid_input_defaults_int_failed: true
+              when: >-
+                'defaults items must be' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert defaults item as integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_defaults_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject defaults items that are
+              not strings or mappings
+
+        # --- Test: selinux_role as integer ---
+        - name: Assert rejects selinux_role as integer
+          block:
+            - name: Run role with selinux_role as integer
+              ansible.builtin.include_tasks:
+                tasks/run_role_with_clear_facts.yml
+              vars:
+                sudo_sudoers_files:
+                  - path: /etc/sudoers
+                    user_specifications:
+                      - users:
+                          - root
+                        hosts:
+                          - ALL
+                        commands:
+                          - ALL
+                        selinux_role: 12345
+          rescue:
+            - name: Mark integer selinux_role rejected
+              ansible.builtin.set_fact:
+                __invalid_input_selinux_role_int_failed: true
+              when: >-
+                'selinux_role' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_role as integer was rejected
+          ansible.builtin.assert:
+            that:
+              - >-
+                __invalid_input_selinux_role_int_failed
+                | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_role when given
+              an integer
+
+        # --- Test: selinux_type as boolean ---
+        - name: Assert rejects selinux_type as boolean
+          block:
+            - name: Run role with selinux_type as boolean
+              ansible.builtin.include_tasks:
+                tasks/run_role_with_clear_facts.yml
+              vars:
+                sudo_sudoers_files:
+                  - path: /etc/sudoers
+                    user_specifications:
+                      - users:
+                          - root
+                        hosts:
+                          - ALL
+                        commands:
+                          - ALL
+                        selinux_type: true
+          rescue:
+            - name: Mark boolean selinux_type rejected
+              ansible.builtin.set_fact:
+                __invalid_input_selinux_type_bool_failed: true
+              when: >-
+                'selinux_type' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_type as boolean was rejected
+          ansible.builtin.assert:
+            that:
+              - >-
+                __invalid_input_selinux_type_bool_failed
+                | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_type when given
+              a boolean
+
+      always:
+        - name: Restore sudoers configuration
+          ansible.builtin.include_tasks: tasks/cleanup.yml
+          tags: tests::cleanup
+
+        - name: Clear test facts
+          ansible.builtin.set_fact:
+            __invalid_input_rewrite_type_failed:
+            __invalid_input_sudoers_files_type_failed:
+            __invalid_input_missing_path_failed:
+            __invalid_input_override_type_choice_failed:
+            __invalid_input_missing_alias_name_failed:
+            __invalid_input_reboot_ok_string_failed:
+            __invalid_input_reboot_ok_int_failed:
+            __invalid_input_defaults_int_failed:
+            __invalid_input_selinux_role_int_failed:
+            __invalid_input_selinux_type_bool_failed:
+          tags: tests::cleanup
