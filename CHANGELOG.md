@@ -1,6 +1,24 @@
 Changelog
 =========
 
+[1.5.0] - 2026-09-17
+--------------------
+
+### New Features
+
+- feat: Argument spec implementation for sudo role (#143)
+
+### Other Changes
+
+- ci: use commit hash for github action, add persist-credentials false [citest_skip] (#139)
+- ci: refactor build_docs so that pandoc runs in isolated read-only job [citest_skip] (#140)
+- ci: use exact match for systemroller instead of contains [citest_skip] (#141)
+- ci(build_docs): fix pandoc container syntax [citest_skip] (#142)
+- refactor: Relax collection constraints, gate vendored modules by python version, update ci versions [citest_skip] (#149)
+- ci: do not run ci tests by default, require citest comment or label [citest_skip] (#150)
+- ci: replace weekly_ci with periodic_ci, stagger schedules [citest_skip] (#151)
+- ci: update status when action triggered by issue comment (#152)
+
 [1.4.0] - 2026-08-06
 --------------------
 
