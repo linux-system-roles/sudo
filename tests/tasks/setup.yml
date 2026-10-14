@@ -7,6 +7,12 @@
     state: directory
   register: __sudo_tmpdir
 
+# Some distributions ship only /usr/etc/sudoers until /etc/sudoers is created
+- name: Check for /etc/sudoers
+  stat:
+    path: /etc/sudoers
+  register: __sudo_sudoers_stat
+
 - name: Backup sudoers
   copy:
     src: /etc/sudoers
@@ -15,6 +21,7 @@
     group: root
     mode: "0644"
     remote_src: true
+  when: __sudo_sudoers_stat.stat.exists
 
 - name: Backup sudoers.d
   copy:

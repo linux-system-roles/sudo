@@ -4,7 +4,7 @@ This role configures sudo.
 
 ## Requirements
 
-This role is only supported on RHEL8+ and Fedora distributions.
+This role is supported on RHEL8+, Fedora, SLES 16+ and openSUSE Leap 16+ distributions.
 Consider reading sudo documentation before setting it up.
 
 ### Collection requirements
@@ -26,6 +26,11 @@ Check the defaults in [`defaults/main.yml`](defaults/main.yml) prior to running 
 
 Use role default or user defined `sudo_sudoers_files` definition, replacing your distribution supplied `/etc/sudoers` file.
 Useful when attempting to deploy new configuration files to the `include_directories` and you do not wish to modify the `/etc/sudoers` file.
+
+On distributions that ship their default policy as `/usr/etc/sudoers` (SLES 16, openSUSE Leap 16), the `/etc/sudoers` written by the role replaces that policy, and the drop-ins that policy includes from `/usr/etc/sudoers.d` no longer apply.
+To keep that policy, set this variable to `false` and put the `path` of each `sudo_sudoers_files` entry under `/etc/sudoers.d`, which that policy includes.
+With this variable `false`, the role leaves the default policy of SLES and openSUSE Leap in place, and that policy lets every user run any command as root with the root password (`targetpw`).
+A drop-in that sets `!targetpw` therefore lets every user it applies to run any command as root with their own password.
 
 Default: `true`
 
