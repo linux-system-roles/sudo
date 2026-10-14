@@ -20,6 +20,8 @@ galaxy_info:
     - el10
     - fedora
     - leap
+    - sles
+    - sles16
     - container
     - containerbuild
 dependencies: []

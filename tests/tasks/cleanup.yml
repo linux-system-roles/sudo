@@ -8,6 +8,13 @@
     group: root
     mode: "0644"
     remote_src: true
+  when: __sudo_sudoers_stat.stat.exists
+
+- name: Remove sudoers created by the test
+  file:
+    path: /etc/sudoers
+    state: absent
+  when: not __sudo_sudoers_stat.stat.exists
 
 - name: Restore sudoers.d
   copy:
