@@ -2,6 +2,13 @@
 ---
 - name: Verify invalid parameters are rejected
   hosts: all
+  vars:
+    __invalid_input_failure_messages: >-
+      {{ ([ansible_failed_result.msg | default('') | string,
+           ansible_failed_result.msg.msg | default('') | string]
+          + (ansible_failed_result.results | default([])
+             | map(attribute='msg') | map('default', '') | list))
+         | join(' ') }}
   tasks:
     - name: Back up sudoers configuration
       ansible.builtin.include_tasks: tasks/setup.yml
@@ -35,8 +42,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_rewrite_type_failed: true
                   when: >-
-                    'sudo_rewrite_default_sudoers_file' in
-                    (ansible_failed_result | default({}) | to_json)
+                    "argument 'sudo_rewrite_default_sudoers_file'" in
+                    __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid sudo_rewrite_default_sudoers_file type
                 was rejected
@@ -60,8 +68,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_sudoers_files_type_failed: true
                   when: >-
-                    'sudo_sudoers_files' in
-                    (ansible_failed_result | default({}) | to_json)
+                    "Elements value for option 'sudo_sudoers_files'" in
+                    __invalid_input_failure_messages and
+                    'convert to dict' in __invalid_input_failure_messages
 
             - name: Assert invalid sudo_sudoers_files type was rejected
               ansible.builtin.assert:
@@ -89,8 +98,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_missing_path_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: path found in sudo_sudoers_files'
+                    in __invalid_input_failure_messages
 
             - name: Assert missing path in sudo_sudoers_files was
                 rejected
@@ -122,8 +131,10 @@
                   ansible.builtin.set_fact:
                     __invalid_input_override_type_choice_failed: true
                   when: >-
-                    'invalid_type' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'value of type must be one of' in
+                    __invalid_input_failure_messages and
+                    'invalid_type found in sudo_sudoers_files -> default_overrides'
+                    in __invalid_input_failure_messages
 
             - name: Assert invalid default_overrides type choice was
                 rejected
@@ -154,8 +165,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_missing_alias_name_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: name found in sudo_sudoers_files -> aliases -> user_alias'
+                    in __invalid_input_failure_messages
 
             - name: Assert missing name in user_alias was rejected
               ansible.builtin.assert:
@@ -185,8 +196,10 @@
               ansible.builtin.set_fact:
                 __invalid_input_reboot_ok_string_failed: true
               when: >-
-                'sudo_transactional_update_reboot_ok' in
-                (ansible_failed_result | default({}) | to_json)
+                'sudo_transactional_update_reboot_ok must be null or a boolean'
+                in __invalid_input_failure_messages and
+                ('got str' in __invalid_input_failure_messages or
+                 'got AnsibleUnicode' in __invalid_input_failure_messages)
 
         - name: Assert transactional_update_reboot_ok as string was
             rejected
@@ -215,8 +228,8 @@
               ansible.builtin.set_fact:
                 __invalid_input_reboot_ok_int_failed: true
               when: >-
-                'sudo_transactional_update_reboot_ok' in
-                (ansible_failed_result | default({}) | to_json)
+                'sudo_transactional_update_reboot_ok must be null or a boolean, got int'
+                in __invalid_input_failure_messages
 
         - name: Assert transactional_update_reboot_ok as integer was
             rejected
@@ -246,8 +259,8 @@
               ansible.builtin.set_fact:
                 __invalid_input_defaults_int_failed: true
               when: >-
-                'defaults items must be' in
-                (ansible_failed_result | default({}) | to_json)
+                'sudo_sudoers_files defaults items must be strings or mappings, got int'
+                in __invalid_input_failure_messages
 
         - name: Assert defaults item as integer was rejected
           ansible.builtin.assert:
@@ -279,8 +292,8 @@
               ansible.builtin.set_fact:
                 __invalid_input_selinux_role_int_failed: true
               when: >-
-                'selinux_role' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_role in user_specifications must be a string or list of strings, got int'
+                in __invalid_input_failure_messages
 
         - name: Assert selinux_role as integer was rejected
           ansible.builtin.assert:
@@ -314,8 +327,8 @@
               ansible.builtin.set_fact:
                 __invalid_input_selinux_type_bool_failed: true
               when: >-
-                'selinux_type' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_type in user_specifications must be a string or list of strings, got bool'
+                in __invalid_input_failure_messages
 
         - name: Assert selinux_type as boolean was rejected
           ansible.builtin.assert:
