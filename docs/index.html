@@ -191,8 +191,9 @@ multi-file sudoers configuration</a></li>
 <hr>
 <p>This role configures sudo.</p>
 <h1 id="requirements">Requirements</h1>
-<p>This role is only supported on RHEL8+ and Fedora distributions.
-Consider reading sudo documentation before setting it up.</p>
+<p>This role is supported on RHEL8+, Fedora, SLES 16+ and openSUSE Leap
+16+ distributions. Consider reading sudo documentation before setting it
+up.</p>
 <h2 id="collection-requirements">Collection requirements</h2>
 <p>The role requires external collections only for management of
 <code>rpm-ostree</code> nodes. Please run the following command to
@@ -211,6 +212,19 @@ definition, replacing your distribution supplied
 <code>/etc/sudoers</code> file. Useful when attempting to deploy new
 configuration files to the <code>include_directories</code> and you do
 not wish to modify the <code>/etc/sudoers</code> file.</p>
+<p>On distributions that ship their default policy as
+<code>/usr/etc/sudoers</code> (SLES 16, openSUSE Leap 16), the
+<code>/etc/sudoers</code> written by the role replaces that policy, and
+the drop-ins that policy includes from <code>/usr/etc/sudoers.d</code>
+no longer apply. To keep that policy, set this variable to
+<code>false</code> and put the <code>path</code> of each
+<code>sudo_sudoers_files</code> entry under <code>/etc/sudoers.d</code>,
+which that policy includes. With this variable <code>false</code>, the
+role leaves the default policy of SLES and openSUSE Leap in place, and
+that policy lets every user run any command as root with the root
+password (<code>targetpw</code>). A drop-in that sets
+<code>!targetpw</code> therefore lets every user it applies to run any
+command as root with their own password.</p>
 <p>Default: <code>true</code></p>
 <p>Type: <code>bool</code></p>
 <h2 id="sudo_check_if_configured">sudo_check_if_configured</h2>
